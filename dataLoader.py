@@ -35,6 +35,7 @@ def load_data(filepath, input_window=24, output_window=12, batch_size=32, shuffl
     # Split the data into training and test sets
     train_size = int(len(data) * train_ratio)
     train_data = data[:train_size]
+
     test_data = data[train_size:]
 
     # Standardize the data

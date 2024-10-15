@@ -10,6 +10,7 @@ filepath = "ETTh1.csv"
 input_window = 96  # Number of time steps for the input (for long-term forecasting)
 output_window = 16  # Number of time steps for the output (for long-term forecasting)
 seg_len = 8
+
 batch_size = 16
 
 train_loader, test_loader = load_data(filepath, input_window, output_window, batch_size)

@@ -52,6 +52,7 @@ class GRUModel(nn.Module):
         print(x.shape)
         # normalization and permute     b,s,c -> b,c,s
         seq_last = x[:, -1:, :].detach()
+
         x = (x - seq_last).permute(0, 2, 1)  # b,c,s
 
         # segment and embedding    b,c,s -> bc,n,w -> bc,n,d
