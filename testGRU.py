@@ -4,100 +4,97 @@ import torch.optim as optim
 import torch.nn.functional as F
 from dataLoader import load_data
 
-filepath = "ETTh1.csv"
-# Load the data
-input_window = 96  # Number of time steps for the input (for long-term forecasting)
-output_window = 96  # Number of time steps for the output (for long-term forecasting)
-batch_size = 32
-
-train_loader, test_loader = load_data(filepath, input_window, output_window, batch_size)
-
 
 class GRUModel(nn.Module):
-    def __init__(self, input_size=1, hidden_size=128, num_layers=2, output_size=1):
+    def __init__(self, input_size=1, hidden_size=96, num_layers=2, output_size=1, seg_len = 1):
         super(GRUModel, self).__init__()
+        self.seq_len = input_size
+        self.pred_len = output_size
+        self.enc_in = 1
+        # enc_in为变量数
+        self.d_model = 128
+
+
         self.hidden_size = hidden_size
         self.num_layers = num_layers
+        self.dropout = 0.1
+        self.seg_len = seg_len
+        self.seg_num_x = self.seq_len // self.seg_len
+        self.seg_num_y = self.pred_len // self.seg_len
 
+
+        self.valueEmbedding = nn.Sequential(
+            nn.Linear(self.seg_len, self.d_model),
+            nn.ReLU()
+        )
         # 定义GRU层
         self.gru = nn.GRU(
-            input_size=input_size,
-            hidden_size=hidden_size,
+            input_size=self.d_model,
+            hidden_size=self.d_model,
             num_layers=num_layers,
-            batch_first=True
+            bias=True,
+            batch_first=True,
+            bidirectional=False
         )
-
+        self.pos_emb = nn.Parameter(torch.randn(self.seg_num_y, self.hidden_size // 2))
+        self.channel_emb = nn.Parameter(torch.randn(self.enc_in, self.hidden_size // 2))
         # 定义输出层
-        self.fc = nn.Linear(hidden_size, output_size)
+        self.predict = nn.Sequential(
+            nn.Dropout(self.dropout),
+            nn.Linear(self.d_model, self.seg_len)
+        )
+        # nn.Linear(hidden_size, output_size))
+
+    def encoder(self, x):
+        # b:batch_size c:channel_size s:seq_len s:seq_len
+        # d:d_model w:seg_len n:seg_num_x m:seg_num_y
+        batch_size = x.size(0)
+        print(x.shape)
+        # normalization and permute     b,s,c -> b,c,s
+        seq_last = x[:, -1:, :].detach()
+        x = (x - seq_last).permute(0, 2, 1)  # b,c,s
+
+        # segment and embedding    b,c,s -> bc,n,w -> bc,n,d
+        x = self.valueEmbedding(x.reshape(-1, self.seg_num_x, self.seg_len))
+        print(x.shape)
+        # encoding
+        _, hn = self.gru(x)  # bc,n,d  1,bc,d
+        print("here comes hn.shape:")
+        print(hn.shape)
+        # m,d//2 -> 1,m,d//2 -> c,m,d//2
+        # c,d//2 -> c,1,d//2 -> c,m,d//2
+        # c,m,d -> cm,1,d -> bcm, 1, d
+        pos_emb = torch.cat([
+            self.pos_emb.unsqueeze(0).repeat(self.enc_in, 1, 1),
+            self.channel_emb.unsqueeze(1).repeat(1, self.seg_num_y, 1)
+        ], dim=-1).view(-1, 1, self.d_model).repeat(batch_size, 1, 1)
+        print("here comes pos_emb.shape:")
+        print(pos_emb.shape)
+        _, hy = self.gru(pos_emb, hn.repeat(1, 1, self.seg_num_y).view(1, -1, self.d_model))  # bcm,1,d  1,bcm,d
+        # print("here comes hy.shape:")
+        # print(hy.shape)
+        # 1,bcm,d -> 1,bcm,w -> b,c,s
+        y = self.predict(hy)
+        # print("here comes y.shape:")
+        # print(y.shape)
+        y = y.view(-1, self.enc_in, self.pred_len)
+        # permute and denorm
+        y = y.permute(0, 2, 1)
+
+        y = y + seq_last
+        return y
 
     def forward(self, x):
         # 初始化隐藏状态
-        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
-
-        # GRU前向传播
-        out, _ = self.gru(x, h0)  # out: [batch_size, seq_length, hidden_size]
-
-        # 将GRU的输出传入全连接层
-        out = self.fc(out)  # out: [batch_size, seq_length, output_size]
-
-        return out
-
+        return self.encoder(x)
+        # h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
+        #
+        # # GRU前向传播
+        # out, _ = self.gru(x, h0)  # out: [batch_size, seq_length, hidden_size]
+        #
+        # # 将GRU的输出传入全连接层
+        # out = self.predict(out)  # out: [batch_size, seq_length, output_size]
+        #
+        # return out
 
 # 设置设备
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-# 实例化模型
-model = GRUModel(output_size=output_window).to(device)
-
-# 定义损失函数和优化器
-criterion = nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
-
-num_epochs = 100  # 训练轮数
-
-for epoch in range(num_epochs):
-    model.train()
-    total_loss = 0
-
-    for X_batch, Y_batch in train_loader:
-        X_batch = X_batch.to(device)
-        Y_batch = Y_batch.to(device)
-
-        # 前向传播
-        outputs = model(X_batch)
-
-        # 计算损失
-        loss = criterion(outputs, Y_batch)
-
-        # 反向传播和优化
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        total_loss += loss.item()
-
-    avg_loss = total_loss / len(train_loader)
-    print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {avg_loss:.4f}')
-
-model.eval()  # 将模型设置为评估模式
-mse_loss = 0
-mae_loss = 0
-total_samples = 0
-
-with torch.no_grad():
-    for X_batch, Y_batch in test_loader:
-        X_batch = X_batch.to(device)
-        Y_batch = Y_batch.to(device)
-
-        outputs = model(X_batch)
-
-        # 计算 MSE 和 MAE，使用 'sum' 来累加每个样本的误差
-        mse_loss += nn.functional.mse_loss(outputs, Y_batch, reduction='sum').item()
-        mae_loss += nn.functional.l1_loss(outputs, Y_batch, reduction='sum').item()
-        total_samples += Y_batch.numel()  # 统计总的样本数
-
-# 计算平均 MSE 和 MAE
-mse = mse_loss / total_samples
-mae = mae_loss / total_samples
-
-print(f'Test MSE: {mse:.6f}, Test MAE: {mae:.6f}')
