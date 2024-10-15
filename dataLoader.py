@@ -44,7 +44,7 @@ def load_data(filepath, input_window=24, output_window=12, batch_size=32, shuffl
     train_dataset = ETTh1Dataset(train_data, input_window=input_window, output_window=output_window, scaler=scaler)
     test_dataset = ETTh1Dataset(test_data, input_window=input_window, output_window=output_window, scaler=scaler)
     # print(train_dataset)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     # print(train_loader)
     return train_loader, test_loader
@@ -55,12 +55,12 @@ if __name__ == "__main__":
     filepath = "ETTh1.csv"
 
     # Load the data
-    input_window = 96  # Number of time steps for the input (for long-term forecasting)
+    input_window = 256  # Number of time steps for the input (for long-term forecasting)
     output_window = 48  # Number of time steps for the output (for long-term forecasting)
     batch_size = 32
 
     train_loader, test_loader = load_data(filepath, input_window, output_window, batch_size)
-
+    # print(len(train_loader))
     # Iterate through the training DataLoader to see how batches are prepared
     for batch_idx, (x, y) in enumerate(train_loader):
         print(f"Batch {batch_idx + 1} - X shape: {x.shape}, Y shape: {y.shape}")
