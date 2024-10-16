@@ -11,6 +11,7 @@ input_window = 720  # Number of time steps for the input (for long-term forecast
 output_window = 96  # Number of time steps for the output (for long-term forecasting)
 seg_len = 48
 
+
 batch_size = 32
 
 train_loader, test_loader = load_data(filepath, input_window, output_window, batch_size)

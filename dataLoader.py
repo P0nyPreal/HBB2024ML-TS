@@ -40,6 +40,7 @@ def load_data(filepath, input_window=24, output_window=12, batch_size=32, shuffl
     # Standardize the data
     scaler = StandardScaler()
 
+
     # Create dataset and DataLoader for training and test sets
     train_dataset = ETTh1Dataset(train_data, input_window=input_window, output_window=output_window, scaler=scaler)
     test_dataset = ETTh1Dataset(test_data, input_window=input_window, output_window=output_window, scaler=scaler)
