@@ -28,14 +28,13 @@ def load_data(filepath, input_window=24, output_window=12, batch_size=32, shuffl
     # Load the CSV data into a Pandas DataFrame
     df = pd.read_csv(filepath, index_col='date', parse_dates=True)
     df = df.fillna(method='ffill')  # Handle missing values by forward filling
-
+    target_columns = ['HUFL', 'HULL', 'MUFL', 'MULL', 'LUFL', 'LULL', 'OT']
     # Extract the features you want to use
-    data = df[['OT']].values  # Assuming 'OT' is the target column
+    data = df[target_columns].values  # Assuming 'OT' is the target column
 
     # Split the data into training and test sets
     train_size = int(len(data) * train_ratio)
     train_data = data[:train_size]
-
     test_data = data[train_size:]
 
     # Standardize the data

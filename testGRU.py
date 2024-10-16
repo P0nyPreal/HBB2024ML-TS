@@ -6,18 +6,18 @@ from dataLoader import load_data
 
 # 此文件就对SegRNN的复现，属于是好宝宝的测试
 class GRUModel(nn.Module):
-    def __init__(self, input_size=1, hidden_size=96, num_layers=1, output_size=1, seg_len = 1):
+    def __init__(self, input_size=1, num_layers=1, output_size=1, seg_len = 1, enc_in = 1):
         super(GRUModel, self).__init__()
         self.seq_len = input_size
         self.pred_len = output_size
-        self.enc_in = 1
+        self.enc_in = enc_in
         # enc_in为变量数，是输入x的shape[-1]
         self.d_model = 128
 
 
         self.hidden_size = self.d_model
         self.num_layers = num_layers
-        self.dropout = 0.1
+        self.dropout = 0.2
         self.seg_len = seg_len
         self.seg_num_x = self.seq_len // self.seg_len
         self.seg_num_y = self.pred_len // self.seg_len

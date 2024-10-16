@@ -8,8 +8,8 @@ from testGRU import GRUModel
 filepath = "ETTh1.csv"
 # Load the data
 input_window = 96  # Number of time steps for the input (for long-term forecasting)
-output_window = 64  # Number of time steps for the output (for long-term forecasting)
-seg_len = 8
+output_window = 96  # Number of time steps for the output (for long-term forecasting)
+seg_len = 32
 
 batch_size = 32
 
@@ -18,13 +18,13 @@ train_loader, test_loader = load_data(filepath, input_window, output_window, bat
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # 实例化模型
-model = GRUModel(input_size=input_window, output_size=output_window, seg_len=seg_len).to(device)
+model = GRUModel(input_size=input_window, output_size=output_window, seg_len=seg_len, enc_in = 7).to(device)
 
 # 定义损失函数和优化器
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-num_epochs = 100  # 训练轮数
+num_epochs = 250  # 训练轮数
 
 for epoch in range(num_epochs):
     model.train()
