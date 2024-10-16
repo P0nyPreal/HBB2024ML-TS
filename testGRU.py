@@ -12,12 +12,12 @@ class GRUModel(nn.Module):
         self.pred_len = output_size
         self.enc_in = enc_in
         # enc_in为变量数，是输入x的shape[-1]
-        self.d_model = 128
+        self.d_model = 512
 
 
         self.hidden_size = self.d_model
         self.num_layers = num_layers
-        self.dropout = 0.2
+        self.dropout = 0.35
         self.seg_len = seg_len
         self.seg_num_x = self.seq_len // self.seg_len
         self.seg_num_y = self.pred_len // self.seg_len
@@ -40,8 +40,8 @@ class GRUModel(nn.Module):
         self.channel_emb = nn.Parameter(torch.randn(self.enc_in, self.hidden_size // 2))
         # 定义输出层
         self.predict = nn.Sequential(
+            nn.Linear(self.d_model, self.seg_len),
             nn.Dropout(self.dropout),
-            nn.Linear(self.d_model, self.seg_len)
         )
         # nn.Linear(hidden_size, output_size))
 

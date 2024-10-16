@@ -7,9 +7,9 @@ from testGRU import GRUModel
 
 filepath = "ETTh1.csv"
 # Load the data
-input_window = 96  # Number of time steps for the input (for long-term forecasting)
+input_window = 720  # Number of time steps for the input (for long-term forecasting)
 output_window = 96  # Number of time steps for the output (for long-term forecasting)
-seg_len = 32
+seg_len = 48
 
 batch_size = 32
 
@@ -24,7 +24,7 @@ model = GRUModel(input_size=input_window, output_size=output_window, seg_len=seg
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-num_epochs = 250  # 训练轮数
+num_epochs = 500  # 训练轮数
 
 for epoch in range(num_epochs):
     model.train()
@@ -51,25 +51,25 @@ for epoch in range(num_epochs):
     avg_loss = total_loss / len(train_loader)
     print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {avg_loss:.4f}')
 
-model.eval()  # 将模型设置为评估模式
-mse_loss = 0
-mae_loss = 0
-total_samples = 0
+    model.eval()  # 将模型设置为评估模式
+    mse_loss = 0
+    mae_loss = 0
+    total_samples = 0
 
-with torch.no_grad():
-    for X_batch, Y_batch in test_loader:
-        X_batch = X_batch.to(device)
-        Y_batch = Y_batch.to(device)
+    with torch.no_grad():
+        for X_batch, Y_batch in test_loader:
+            X_batch = X_batch.to(device)
+            Y_batch = Y_batch.to(device)
 
-        outputs = model(X_batch)
+            outputs = model(X_batch)
 
-        # 计算 MSE 和 MAE，使用 'sum' 来累加每个样本的误差
-        mse_loss += nn.functional.mse_loss(outputs, Y_batch, reduction='sum').item()
-        mae_loss += nn.functional.l1_loss(outputs, Y_batch, reduction='sum').item()
-        total_samples += Y_batch.numel()  # 统计总的样本数
+            # 计算 MSE 和 MAE，使用 'sum' 来累加每个样本的误差
+            mse_loss += nn.functional.mse_loss(outputs, Y_batch, reduction='sum').item()
+            mae_loss += nn.functional.l1_loss(outputs, Y_batch, reduction='sum').item()
+            total_samples += Y_batch.numel()  # 统计总的样本数
 
 # 计算平均 MSE 和 MAE
-mse = mse_loss / total_samples
-mae = mae_loss / total_samples
+    mse = mse_loss / total_samples
+    mae = mae_loss / total_samples
 
-print(f'Test MSE: {mse:.6f}, Test MAE: {mae:.6f}')
+    print(f'Test MSE: {mse:.6f}, Test MAE: {mae:.6f}')
