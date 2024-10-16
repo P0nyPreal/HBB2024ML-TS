@@ -4,18 +4,18 @@ import torch.optim as optim
 import torch.nn.functional as F
 from dataLoader import load_data
 
-
+# 此文件就对SegRNN的复现，属于是好宝宝的测试
 class GRUModel(nn.Module):
-    def __init__(self, input_size=1, hidden_size=96, num_layers=2, output_size=1, seg_len = 1):
+    def __init__(self, input_size=1, hidden_size=96, num_layers=1, output_size=1, seg_len = 1):
         super(GRUModel, self).__init__()
         self.seq_len = input_size
         self.pred_len = output_size
         self.enc_in = 1
-        # enc_in为变量数
+        # enc_in为变量数，是输入x的shape[-1]
         self.d_model = 128
 
 
-        self.hidden_size = hidden_size
+        self.hidden_size = self.d_model
         self.num_layers = num_layers
         self.dropout = 0.1
         self.seg_len = seg_len
@@ -49,7 +49,7 @@ class GRUModel(nn.Module):
         # b:batch_size c:channel_size s:seq_len s:seq_len
         # d:d_model w:seg_len n:seg_num_x m:seg_num_y
         batch_size = x.size(0)
-        print(x.shape)
+        # print(x.shape)
         # normalization and permute     b,s,c -> b,c,s
         seq_last = x[:, -1:, :].detach()
 
@@ -57,11 +57,11 @@ class GRUModel(nn.Module):
 
         # segment and embedding    b,c,s -> bc,n,w -> bc,n,d
         x = self.valueEmbedding(x.reshape(-1, self.seg_num_x, self.seg_len))
-        print(x.shape)
+        # print(x.shape)
         # encoding
         _, hn = self.gru(x)  # bc,n,d  1,bc,d
-        print("here comes hn.shape:")
-        print(hn.shape)
+        # print("here comes hn.shape:")
+        # print(hn.shape)
         # m,d//2 -> 1,m,d//2 -> c,m,d//2
         # c,d//2 -> c,1,d//2 -> c,m,d//2
         # c,m,d -> cm,1,d -> bcm, 1, d
@@ -69,8 +69,8 @@ class GRUModel(nn.Module):
             self.pos_emb.unsqueeze(0).repeat(self.enc_in, 1, 1),
             self.channel_emb.unsqueeze(1).repeat(1, self.seg_num_y, 1)
         ], dim=-1).view(-1, 1, self.d_model).repeat(batch_size, 1, 1)
-        print("here comes pos_emb.shape:")
-        print(pos_emb.shape)
+        # print("here comes pos_emb.shape:")
+        # print(pos_emb.shape)
         _, hy = self.gru(pos_emb, hn.repeat(1, 1, self.seg_num_y).view(1, -1, self.d_model))  # bcm,1,d  1,bcm,d
         # print("here comes hy.shape:")
         # print(hy.shape)
