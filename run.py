@@ -6,7 +6,7 @@ from torch.optim.lr_scheduler import StepLR
 # import torch.nn.functional as F
 from dataLoader import load_data
 from testGRU import GRUModel
-
+from MSEshower import plot_two_arrays
 
 filepath = "ETTh1.csv"
 # Load the data
@@ -28,6 +28,8 @@ criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.01)
 scheduler = StepLR(optimizer, step_size=3, gamma=0.8)
 
+globalMSE_train = []
+globalMSE_test = []
 
 num_epochs = 30  # 训练轮数
 
@@ -56,6 +58,7 @@ for epoch in range(num_epochs):
         # total_samples_whileTrain += Y_batch.numel()
     scheduler.step()
     avg_loss = total_loss / len(train_loader)
+    globalMSE_train.append(avg_loss)
     print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {avg_loss:.4f}')
     # mse_whileTrain = mse_loss_whileTrain / total_samples_whileTrain
     # print(f'Epoch [{epoch + 1}/{num_epochs}], MSE: {mse_whileTrain:.4f}')
@@ -80,5 +83,10 @@ for epoch in range(num_epochs):
     # 计算平均 MSE 和 MAE
     mse = mse_loss / total_samples
     mae = mae_loss / total_samples
-
+    globalMSE_test.append(mse)
     print(f'Test MSE: {mse:.6f}, Test MAE: {mae:.6f}')
+
+
+print(globalMSE_test)
+print(globalMSE_train)
+plot_two_arrays(globalMSE_train, globalMSE_test)
