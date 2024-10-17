@@ -24,7 +24,7 @@ class ETTh1Dataset(Dataset):
         return torch.tensor(x, dtype=torch.float32), torch.tensor(y, dtype=torch.float32)
 
 
-def load_data(filepath, input_window=24, output_window=12, batch_size=32, shuffle=True, train_ratio=0.8):
+def load_data(filepath, input_window=24, output_window=12, batch_size=32, train_ratio=0.2):
     # Load the CSV data into a Pandas DataFrame
     df = pd.read_csv(filepath, index_col='date', parse_dates=True)
     df = df.fillna(method='ffill')  # Handle missing values by forward filling
@@ -34,8 +34,11 @@ def load_data(filepath, input_window=24, output_window=12, batch_size=32, shuffl
 
     # Split the data into training and test sets
     train_size = int(len(data) * train_ratio)
-    train_data = data[:train_size]
-    test_data = data[train_size:]
+    # train_data = data[:train_size]
+    # test_data = data[train_size:]
+
+    test_data = data[:train_size]
+    train_data = data[train_size:]
 
     # Standardize the data
     scaler = StandardScaler()
@@ -45,10 +48,10 @@ def load_data(filepath, input_window=24, output_window=12, batch_size=32, shuffl
     train_dataset = ETTh1Dataset(train_data, input_window=input_window, output_window=output_window, scaler=scaler)
     test_dataset = ETTh1Dataset(test_data, input_window=input_window, output_window=output_window, scaler=scaler)
     # print(train_dataset)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False, drop_last=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
-    print(len(test_loader))
-    print(len(train_loader))
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, drop_last=False)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
+    # print(len(test_loader))
+    # print(len(train_loader))
     return train_loader, test_loader
 
 
