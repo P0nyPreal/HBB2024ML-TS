@@ -24,6 +24,7 @@ class ETTh1Dataset(Dataset):
         return torch.tensor(x, dtype=torch.float32), torch.tensor(y, dtype=torch.float32)
 
 
+
 def load_data(filepath, input_window=24, output_window=12, batch_size=32, train_ratio=0.2):
     # Load the CSV data into a Pandas DataFrame
     df = pd.read_csv(filepath, index_col='date', parse_dates=True)

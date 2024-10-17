@@ -5,6 +5,7 @@ import torch.nn.functional as F
 from dataLoader import load_data
 
 
+
 # 此文件就对SegRNN的复现，属于是好宝宝的测试
 class GRUModel(nn.Module):
     def __init__(self, input_size=1, num_layers=1, output_size=1, seg_len = 1, enc_in = 1):

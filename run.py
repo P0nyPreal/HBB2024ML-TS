@@ -7,6 +7,7 @@ from torch.optim.lr_scheduler import StepLR
 from dataLoader import load_data
 from testGRU import GRUModel
 
+
 filepath = "ETTh1.csv"
 # Load the data
 input_window = 720  # Number of time steps for the input (for long-term forecasting)
