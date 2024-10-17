@@ -25,7 +25,7 @@ class ETTh1Dataset(Dataset):
 
 
 
-def load_data(filepath, input_window=24, output_window=12, batch_size=32, train_ratio=0.2):
+def load_data(filepath, input_window=1, output_window=1, batch_size=32, train_ratio=0.8):
     # Load the CSV data into a Pandas DataFrame
     df = pd.read_csv(filepath, index_col='date', parse_dates=True)
     df = df.fillna(method='ffill')  # Handle missing values by forward filling
@@ -35,11 +35,11 @@ def load_data(filepath, input_window=24, output_window=12, batch_size=32, train_
 
     # Split the data into training and test sets
     train_size = int(len(data) * train_ratio)
-    # train_data = data[:train_size]
-    # test_data = data[train_size:]
+    train_data = data[:train_size]
+    test_data = data[train_size:]
 
-    test_data = data[:train_size]
-    train_data = data[train_size:]
+    # test_data = data[:train_size]
+    # train_data = data[train_size:]
 
     # Standardize the data
     scaler = StandardScaler()

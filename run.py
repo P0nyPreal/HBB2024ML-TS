@@ -34,7 +34,8 @@ num_epochs = 30  # 训练轮数
 for epoch in range(num_epochs):
     model.train()
     total_loss = 0
-
+    # mse_loss_whileTrain = 0
+    # total_samples_whileTrain = 0
     for X_batch, Y_batch in train_loader:
         X_batch = X_batch.to(device)
         # print(X_batch.shape)
@@ -45,16 +46,19 @@ for epoch in range(num_epochs):
 
         # 计算损失
         loss = criterion(outputs, Y_batch)
-
         # 反向传播和优化
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
         total_loss += loss.item()
+
+        # mse_loss_whileTrain += nn.functional.mse_loss(outputs, Y_batch, reduction='sum').item()
+        # total_samples_whileTrain += Y_batch.numel()
     scheduler.step()
     avg_loss = total_loss / len(train_loader)
     print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {avg_loss:.4f}')
+    # mse_whileTrain = mse_loss_whileTrain / total_samples_whileTrain
+    # print(f'Epoch [{epoch + 1}/{num_epochs}], MSE: {mse_whileTrain:.4f}')
 
     model.eval()  # 将模型设置为评估模式
     mse_loss = 0
