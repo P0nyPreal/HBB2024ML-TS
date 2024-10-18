@@ -35,8 +35,8 @@ def load_data(filepath, input_window=1, output_window=1, batch_size=32, train_ra
 
     # Split the data into training and test sets
     train_size = int(len(data) * train_ratio)
-    train_data = data[:train_size]
-    test_data = data[train_size:]
+    train_data = data[:10000]
+    test_data = data[10000:12500]
 
     # test_data = data[:train_size]
     # train_data = data[train_size:]

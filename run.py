@@ -26,7 +26,7 @@ model = GRUModel(input_size=input_window, output_size=output_window, seg_len=seg
 # 定义损失函数和优化器
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.01)
-scheduler = StepLR(optimizer, step_size=3, gamma=0.8)
+# scheduler = StepLR(optimizer, step_size=3, gamma=0.8)
 
 globalMSE_train = []
 globalMSE_test = []
@@ -56,7 +56,7 @@ for epoch in range(num_epochs):
 
         # mse_loss_whileTrain += nn.functional.mse_loss(outputs, Y_batch, reduction='sum').item()
         # total_samples_whileTrain += Y_batch.numel()
-    scheduler.step()
+    # scheduler.step()
     avg_loss = total_loss / len(train_loader)
     globalMSE_train.append(avg_loss)
     print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {avg_loss:.4f}')
