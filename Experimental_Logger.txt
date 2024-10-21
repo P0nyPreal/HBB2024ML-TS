@@ -12,3 +12,115 @@ num_epochs: 30
 learning_rate: 0.001
 filepath: ETTh1.csv
 
+2024-10-21 15:50:56 Test MSE: 0.390626, Test MAE: 0.422281
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.8
+dropout: 0.6
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 64
+num_epochs: 50
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 15:57:39 Test MSE: 0.361455, Test MAE: 0.398239
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.8
+dropout: 0.65
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 128
+num_epochs: 30
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 15:58:49 Test MSE: 0.361122, Test MAE: 0.396851
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.8
+dropout: 0.7
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 128
+num_epochs: 30
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 15:59:43 Test MSE: 0.361520, Test MAE: 0.396778
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.8
+dropout: 0.78
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 128
+num_epochs: 30
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 16:04:24 Test MSE: 0.363871, Test MAE: 0.398998
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.8
+dropout: 0.78
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 128
+num_epochs: 30
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 16:07:36 Test MSE: 0.375246, Test MAE: 0.407469
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.8
+dropout: 0.85
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 128
+num_epochs: 30
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 16:08:31 Test MSE: 0.358773, Test MAE: 0.395222
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.8
+dropout: 0.7
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 128
+num_epochs: 30
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 16:13:31 Test MSE: 0.413475, Test MAE: 0.433012
+input_length: 720
+output_length: 192
+seg_length: 48
+train_ratio: 0.8
+dropout: 0.7
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 128
+num_epochs: 30
+learning_rate: 0.001
+filepath: ETTh1.csv
+
