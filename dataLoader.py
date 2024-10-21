@@ -5,7 +5,7 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler
 import os
 from utils.timefeatures import time_features
-
+from configClass import config
 
 class ETTh1Dataset(Dataset):
     def __init__(self, data, input_window, output_window, scaler=None):
@@ -27,7 +27,12 @@ class ETTh1Dataset(Dataset):
 
 
 
-def load_data(filepath, input_window=1, output_window=1, batch_size=32, train_ratio=0.8):
+def load_data(filepath, CONFIG):
+    input_window = CONFIG.input_length
+    output_window = CONFIG.output_length
+    batch_size = CONFIG.batch_size
+    train_ratio = CONFIG.train_ratio
+
     # Load the CSV data into a Pandas DataFrame
     df = pd.read_csv(filepath, index_col='date', parse_dates=True)
     df = df.fillna(method='ffill')  # Handle missing values by forward filling

@@ -8,34 +8,40 @@ from torch.optim.lr_scheduler import StepLR
 from dataLoader import load_data
 from dataLoader import data_provider
 from testGRU import GRUModel
-from MSEshower import plot_two_arrays
+from MSEshower import plot_two_arrays, write_metrics_to_txt
 from torch.optim import lr_scheduler
+from configClass import config
 
-filepath = "ETTh1.csv"
+CONFIG = config()
+
+filepath = CONFIG.filepath
 # Load the data
-input_window = 720  # Number of time steps for the input (for long-term forecasting)
+input_window = CONFIG.input_length  # Number of time steps for the input (for long-term forecasting)
 # input_window = 96  # Number of time steps for the input (for long-term forecasting)
 
-output_window = 96
+output_window = CONFIG.output_length
     # Number of time steps for the output (for long-term forecasting)
 # output_window = 24  # Number of time steps for the output (for long-term forecasting)
 
-seg_len = 48
+seg_len = CONFIG.seg_length
 # seg_len = 24
 
 
-batch_size = 256
-num_epochs = 30  # 训练轮数
-lr = 0.001
+batch_size = CONFIG.batch_size
+num_epochs = CONFIG.num_epochs  # 训练轮数
+lr = CONFIG.learning_rate
 
-
-train_dataset, train_loader = data_provider(embed='timeF', batch_size=batch_size, freq='h', root_path='./', data_path='ETTh1.csv', seq_len=720, label_len=0, pred_len=96, features='M', target='OT', num_workers=0, flag='train')
-test_dataset, test_loader = data_provider(embed='timeF', batch_size=batch_size, freq='h', root_path='./', data_path='ETTh1.csv', seq_len=720, label_len=0, pred_len=96, features='M', target='OT', num_workers=0, flag='test')
+train_dataset, train_loader = data_provider(embed='timeF', batch_size=batch_size, freq='h', root_path='./',
+                                            data_path=CONFIG.filepath, seq_len=CONFIG.input_length, label_len=0,
+                                            pred_len=CONFIG.output_length, features='M', target='OT', num_workers=0, flag='train')
+test_dataset, test_loader = data_provider(embed='timeF', batch_size=batch_size, freq='h', root_path='./',
+                                          data_path=CONFIG.filepath, seq_len=CONFIG.input_length, label_len=0,
+                                          pred_len=CONFIG.output_length, features='M', target='OT', num_workers=0, flag='test')
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # 实例化模型
-model = GRUModel(input_size=input_window, output_size=output_window, seg_len=seg_len, enc_in=7).to(device)
+model = GRUModel(CONFIG).to(device)
 
 # 定义损失函数和优化器
 criterion = nn.MSELoss()
@@ -51,7 +57,7 @@ scheduler = lr_scheduler.OneCycleLR(optimizer=optimizer,
 
 globalMSE_train = []
 globalMSE_test = []
-
+globalMAE_test = []
 
 for epoch in range(num_epochs):
     model.train()
@@ -113,11 +119,13 @@ for epoch in range(num_epochs):
         mse = np.average(eval_tot_loss)
         mae = mae_loss / total_samples
         globalMSE_test.append(mse)
+        globalMAE_test.append(mae)
         # globalMSE_test.append(eval_tot_loss/ total_samples)
 
         print(f'Test MSE: {mse:.6f}, Test MAE: {mae:.6f}')
 
 
-print(globalMSE_test)
-print(globalMSE_train)
+# print(globalMSE_test)
+# print(globalMSE_train)
 plot_two_arrays(globalMSE_train, globalMSE_test)
+write_metrics_to_txt('Experimental_Logger.txt', globalMSE_test[-1], globalMAE_test[-1], CONFIG)
