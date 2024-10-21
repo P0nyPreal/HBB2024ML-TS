@@ -54,4 +54,4 @@ if __name__ == "__main__":
 #     array2 = [2, 4, 6, 8, 10]
 #     plot_two_arrays(array1, array2)
     CONFIG = config()
-    write_metrics_to_txt('Experimental_Logger.txt', 0.123456, 0.234567, CONFIG)
+    write_metrics_to_txt('../Experimental_Logger.txt', 0.123456, 0.234567, CONFIG)

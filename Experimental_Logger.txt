@@ -124,3 +124,274 @@ num_epochs: 30
 learning_rate: 0.001
 filepath: ETTh1.csv
 
+2024-10-21 16:15:19 Test MSE: 0.442178, Test MAE: 0.453336
+input_length: 720
+output_length: 336
+seg_length: 48
+train_ratio: 0.8
+dropout: 0.7
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 128
+num_epochs: 30
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 16:16:34 Test MSE: 0.539964, Test MAE: 0.526406
+input_length: 720
+output_length: 720
+seg_length: 48
+train_ratio: 0.8
+dropout: 0.7
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 128
+num_epochs: 30
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 16:18:49 Test MSE: 0.535944, Test MAE: 0.526122
+input_length: 720
+output_length: 720
+seg_length: 48
+train_ratio: 0.8
+dropout: 0.78
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 128
+num_epochs: 30
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 16:22:38 Test MSE: 0.368369, Test MAE: 0.403205
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.8
+dropout: 0.78
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 128
+num_epochs: 30
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 16:32:20 Test MSE: 0.364379, Test MAE: 0.398360
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.8
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 30
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 16:34:17 Test MSE: 0.359368, Test MAE: 0.395764
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.8
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 40
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 16:39:02 Test MSE: 0.370982, Test MAE: 0.407805
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.8
+dropout: 0.6
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.002
+filepath: ETTh1.csv
+
+2024-10-21 16:44:31 Test MSE: 0.362564, Test MAE: 0.396134
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 30
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 16:52:24 Test MSE: 0.363155, Test MAE: 0.397969
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 40
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 16:54:10 Test MSE: 0.498101, Test MAE: 0.497992
+input_length: 720
+output_length: 720
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 40
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 16:56:06 Test MSE: 0.579763, Test MAE: 0.547856
+input_length: 720
+output_length: 720
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 60
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 17:21:06 Test MSE: 0.594686, Test MAE: 0.552030
+input_length: 720
+output_length: 720
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 60
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 17:25:49 Test MSE: 0.438092, Test MAE: 0.456076
+input_length: 720
+output_length: 720
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 60
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 17:27:48 Test MSE: 0.358178, Test MAE: 0.394594
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 60
+learning_rate: 0.001
+filepath: ETTh1.csv
+
+2024-10-21 17:30:30 Test MSE: 0.401100, Test MAE: 0.417605
+input_length: 720
+output_length: 192
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 60
+learning_rate: 0.001
+filepath: ETTh1.csv
+exp_logger_path: Experimental_Logger.txt
+
+2024-10-21 17:35:27 Test MSE: 0.401213, Test MAE: 0.416186
+input_length: 720
+output_length: 192
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 30
+learning_rate: 0.001
+filepath: ./dataSets/ETTh1.csv
+exp_logger_path: Experimental_Logger.txt
+
+2024-10-21 17:37:00 Test MSE: 0.417666, Test MAE: 0.430184
+input_length: 720
+output_length: 336
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 30
+learning_rate: 0.001
+filepath: ./dataSets/ETTh1.csv
+exp_logger_path: Experimental_Logger.txt
+
+2024-10-21 17:40:31 Test MSE: 0.437726, Test MAE: 0.454603
+input_length: 720
+output_length: 720
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 30
+learning_rate: 0.001
+filepath: ./dataSets/ETTh1.csv
+exp_logger_path: Experimental_Logger.txt
+
+2024-10-21 17:42:12 Test MSE: 0.439731, Test MAE: 0.456058
+input_length: 720
+output_length: 720
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 40
+learning_rate: 0.001
+filepath: ./dataSets/ETTh1.csv
+exp_logger_path: Experimental_Logger.txt
+

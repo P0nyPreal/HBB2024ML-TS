@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-from dataLoader import load_data
+# import torch.optim as optim
+# import torch.nn.functional as F
+# from dataLoader import load_data
 
 
 
@@ -28,7 +28,7 @@ class GRUModel(nn.Module):
 
         self.valueEmbedding = nn.Sequential(
             nn.Linear(self.seg_len, self.d_model),
-            nn.ReLU()
+            nn.SiLU()
         )
         # 定义GRU层
         self.gru = nn.GRU(
@@ -37,7 +37,8 @@ class GRUModel(nn.Module):
             num_layers=self.num_layers,
             bias=True,
             batch_first=True,
-            bidirectional=False
+            bidirectional=False,
+            # dorpout=0.1
         )
         self.pos_emb = nn.Parameter(torch.randn(self.seg_num_y, self.hidden_size // 2))
         self.channel_emb = nn.Parameter(torch.randn(self.enc_in, self.hidden_size // 2))

@@ -6,9 +6,9 @@ import torch.optim as optim
 
 # import torch.nn.functional as F
 # from dataLoader import load_data
-from dataLoader import data_provider
-from testGRU import GRUModel
-from MSEshower import plot_two_arrays, write_metrics_to_txt
+from SegRNNreNew.dataSets.dataLoader import data_provider
+from SegRNNreNew.models.testGRU import GRUModel
+from SegRNNreNew.utils.MSEshower import plot_two_arrays, write_metrics_to_txt
 from torch.optim import lr_scheduler
 from configClass import config
 
@@ -128,4 +128,4 @@ for epoch in range(num_epochs):
 # print(globalMSE_test)
 # print(globalMSE_train)
 plot_two_arrays(globalMSE_train, globalMSE_test)
-write_metrics_to_txt('Experimental_Logger.txt', globalMSE_test[-1], globalMAE_test[-1], CONFIG)
+write_metrics_to_txt(CONFIG.exp_logger_path, min(globalMSE_test), min(globalMAE_test), CONFIG)
