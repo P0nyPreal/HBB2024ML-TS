@@ -8,7 +8,7 @@ import torch.optim as optim
 # from dataLoader import load_data
 from SegRNNreNew.dataSets.dataLoader import data_provider
 from SegRNNreNew.models.testGRU import GRUModel
-from SegRNNreNew.utils.MSEshower import plot_two_arrays, write_metrics_to_txt
+from SegRNNreNew.utils.MSEshower import plot_two_arrays, write_metrics_to_txt, write_string_to_file
 from torch.optim import lr_scheduler
 from configClass import config
 
@@ -58,6 +58,7 @@ scheduler = lr_scheduler.OneCycleLR(optimizer=optimizer,
 globalMSE_train = []
 globalMSE_test = []
 globalMAE_test = []
+str_to_log = ""
 
 for epoch in range(num_epochs):
     model.train()
@@ -87,7 +88,10 @@ for epoch in range(num_epochs):
     scheduler.step()
     avg_loss = np.average(total_loss)
     globalMSE_train.append(avg_loss)
-    print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {avg_loss:.4f}')
+
+    str_to_print = f'Epoch [{epoch + 1}/{num_epochs}], Loss: {avg_loss:.4f}'
+    print(str_to_print)
+    str_to_log += str_to_print + "\n"
     # mse_whileTrain = mse_loss_whileTrain / total_samples_whileTrain
     # print(f'Epoch [{epoch + 1}/{num_epochs}], MSE: {mse_whileTrain:.4f}')
 
@@ -122,10 +126,13 @@ for epoch in range(num_epochs):
         globalMAE_test.append(mae)
         # globalMSE_test.append(eval_tot_loss/ total_samples)
 
-        print(f'Test MSE: {mse:.6f}, Test MAE: {mae:.6f}')
+        str_to_print = f'Test MSE: {mse:.6f}, Test MAE: {mae:.6f}'
+        print(str_to_print)
+        str_to_log += str_to_print + "\n\n"
 
 
-# print(globalMSE_test)
+    # print(globalMSE_test)
 # print(globalMSE_train)
 plot_two_arrays(globalMSE_train, globalMSE_test)
-write_metrics_to_txt(CONFIG.exp_logger_path, min(globalMSE_test), min(globalMAE_test), CONFIG)
+write_string_to_file(str_to_log, CONFIG, min(globalMSE_test), min(globalMAE_test))
+write_metrics_to_txt(CONFIG.Global_exp_logger_path, min(globalMSE_test), min(globalMAE_test), CONFIG)

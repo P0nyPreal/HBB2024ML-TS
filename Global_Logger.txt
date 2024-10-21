@@ -395,3 +395,125 @@ learning_rate: 0.001
 filepath: ./dataSets/ETTh1.csv
 exp_logger_path: Experimental_Logger.txt
 
+2024-10-21 19:04:18 Test MSE: 0.359594, Test MAE: 0.394554
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 40
+learning_rate: 0.001
+filepath: ./dataSets/ETTh1.csv
+exp_logger_path: Experimental_Logger.txt
+
+2024-10-21 19:45:33 Test MSE: 0.357750, Test MAE: 0.394060
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 40
+learning_rate: 0.001
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-21 19:47:11 Test MSE: 0.358815, Test MAE: 0.393371
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 40
+learning_rate: 0.001
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-21 19:50:32 Test MSE: 0.358300, Test MAE: 0.393397
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 40
+learning_rate: 0.001
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-21 19:53:32 Test MSE: 0.357410, Test MAE: 0.392829
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 40
+learning_rate: 0.001
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-21 19:55:14 Test MSE: 0.359342, Test MAE: 0.394684
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 40
+learning_rate: 0.001
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-21 19:57:43 Test MSE: 0.362509, Test MAE: 0.395594
+model_name: SegRNN
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 30
+learning_rate: 0.001
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-21 19:59:45 Test MSE: 0.358132, Test MAE: 0.394308
+model_name: SegRNN
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+

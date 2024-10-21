@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from configClass import config
+from SegRNNreNew.configClass import config
+import os
+from datetime import datetime
 
 def plot_two_arrays(MSEtrain, MSEtest):
     # Check if the input arrays are of the same length
@@ -44,14 +46,35 @@ def write_metrics_to_txt(file_path, mse, mae, config):
         file.write(line)
 
 
+def write_string_to_file(content: str, CONFIG, mse: float, mae: float):
+    # 获取当前时间，并格式化为字符串
+    timestamp = datetime.now().strftime("%Y'%m'%d-%H'%M'%S")
+
+    # 创建文件名
+    filename = f"{CONFIG.model_name}_{timestamp}_{CONFIG.input_length}_{CONFIG.output_length}_{mse:.4f}.txt"
+
+    config_attributes = "\n".join([f"{attr}: {value}" for attr, value in CONFIG.__dict__.items()])
+    # 组合输出字符串
+    line = f"{timestamp} Test MSE: {mse:.6f}, Test MAE: {mae:.6f}\n{config_attributes}\n\n"
+    # 构建保存路径
+    folder_path = os.path.join(os.getcwd(), "all_logger")
+    file_path = os.path.join(folder_path, filename)
+
+    # 创建文件夹（如果不存在）
+    os.makedirs(folder_path, exist_ok=True)
+
+    # 将内容写入文件
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write(line)
+        f.write(content)
+
+    print(f"日志文件已保存到: {file_path}")
 # 使用示例
 # write_metrics_to_txt('metrics.txt', 0.123456, 0.234567)
 
 
 if __name__ == "__main__":
-# Example usage
-#     array1 = [1, 3, 5, 7, 9]
-#     array2 = [2, 4, 6, 8, 10]
-#     plot_two_arrays(array1, array2)
+
     CONFIG = config()
-    write_metrics_to_txt('../Experimental_Logger.txt', 0.123456, 0.234567, CONFIG)
+    write_string_to_file("这是测试内容", CONFIG, mse=0.1234, mae=0.3456)
+    # write_metrics_to_txt('../Experimental_Logger.txt', 0.123456, 0.234567, CONFIG)
