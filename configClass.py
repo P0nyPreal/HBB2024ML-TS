@@ -2,7 +2,7 @@ import subprocess
 class config:
     def __init__(self):
         self.input_length = 720
-        self.output_length = 192
+        self.output_length = 336
         self.seg_length = 48
         # 分割窗口的大小
         self.train_ratio = 0.8
