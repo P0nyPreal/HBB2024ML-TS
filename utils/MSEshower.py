@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from SegRNNreNew.configClass import config
+from configClass import config
 import os
 from datetime import datetime
 

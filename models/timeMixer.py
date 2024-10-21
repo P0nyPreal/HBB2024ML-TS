@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from TimemixerHBB.utils.functions import series_decomp, DataEmbedding_wo_pos, Normalize
+from utils.functions_TM import series_decomp, DataEmbedding_wo_pos, Normalize
 # from layers.Embed import DataEmbedding_wo_pos
 # from layers.StandardNorm import Normalize
 
@@ -184,10 +184,10 @@ class PastDecomposableMixing(nn.Module):
         return out_list
 
 
-class Model(nn.Module):
+class TimeMixer(nn.Module):
 
     def __init__(self, configs):
-        super(Model, self).__init__()
+        super(TimeMixer, self).__init__()
         self.configs = configs
         # self.task_name = configs.task_name
         self.seq_len = configs.seq_len

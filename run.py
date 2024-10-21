@@ -6,9 +6,10 @@ import torch.optim as optim
 
 # import torch.nn.functional as F
 # from dataLoader import load_data
-from SegRNNreNew.dataSets.dataLoader import data_provider
-from SegRNNreNew.models.testGRU import GRUModel
-from SegRNNreNew.utils.MSEshower import plot_two_arrays, write_metrics_to_txt, write_string_to_file
+from dataSets.data_provider import data_provider
+from models.testGRU import GRUModel
+from models.timeMixer import TimeMixer
+from utils.MSEshower import plot_two_arrays, write_metrics_to_txt, write_string_to_file
 from torch.optim import lr_scheduler
 from configClass import config
 
@@ -31,10 +32,10 @@ batch_size = CONFIG.batch_size
 num_epochs = CONFIG.num_epochs  # 训练轮数
 lr = CONFIG.learning_rate
 
-train_dataset, train_loader = data_provider(embed='timeF', batch_size=batch_size, freq='h', root_path='./',
+train_dataset, train_loader = data_provider(CONFIG.data_set, embed='timeF', batch_size=batch_size, freq='h', root_path='./',
                                             data_path=CONFIG.filepath, seq_len=CONFIG.input_length, label_len=0,
                                             pred_len=CONFIG.output_length, features='M', target='OT', num_workers=0, flag='train')
-test_dataset, test_loader = data_provider(embed='timeF', batch_size=batch_size, freq='h', root_path='./',
+test_dataset, test_loader = data_provider(CONFIG.data_set, embed='timeF', batch_size=batch_size, freq='h', root_path='./',
                                           data_path=CONFIG.filepath, seq_len=CONFIG.input_length, label_len=0,
                                           pred_len=CONFIG.output_length, features='M', target='OT', num_workers=0, flag='test')
 

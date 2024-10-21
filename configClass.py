@@ -1,9 +1,8 @@
 import subprocess
-
-
 class config:
     def __init__(self):
         self.model_name = "SegRNN"
+        # self.model_name = "TimeMixer"
         self.input_length = 720
         self.output_length = 96
         self.seg_length = 48
@@ -18,7 +17,9 @@ class config:
         self.num_epochs = 50
         self.learning_rate = 0.001
 
+        self.data_set = "ETTh1"
         self.filepath = "./dataSets/ETTh1.csv"
+        # self.filepath = "./dataSets/ETTm1.csv"
         self.Global_exp_logger_path = "Global_Logger.txt"
 
 if __name__ == '__main__':
