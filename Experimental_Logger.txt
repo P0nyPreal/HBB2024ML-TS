@@ -1,0 +1,14 @@
+2024-10-21 15:38:29 Test MSE: 0.365544, Test MAE: 0.403912
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.8
+dropout: 0.6
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 64
+num_epochs: 30
+learning_rate: 0.001
+filepath: ETTh1.csv
+
