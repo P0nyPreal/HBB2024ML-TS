@@ -51,13 +51,13 @@ def write_string_to_file(content: str, CONFIG, mse: float, mae: float):
     timestamp = datetime.now().strftime("%Y'%m'%d-%H'%M'%S")
 
     # 创建文件名
-    filename = f"{CONFIG.model_name}_{timestamp}_{CONFIG.input_length}_{CONFIG.output_length}_{mse:.4f}.txt"
+    filename = f"{CONFIG.data_set}_{timestamp}_{CONFIG.input_length}_{CONFIG.output_length}_{mse:.4f}.txt"
 
     config_attributes = "\n".join([f"{attr}: {value}" for attr, value in CONFIG.__dict__.items()])
     # 组合输出字符串
     line = f"{timestamp} Test MSE: {mse:.6f}, Test MAE: {mae:.6f}\n{config_attributes}\n\n"
     # 构建保存路径
-    folder_path = os.path.join(os.getcwd(), "all_logger")
+    folder_path = os.path.join(os.getcwd(), "all_logger/" + CONFIG.model_name)
     file_path = os.path.join(folder_path, filename)
 
     # 创建文件夹（如果不存在）
