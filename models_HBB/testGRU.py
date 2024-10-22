@@ -20,11 +20,12 @@ class GRUModel(nn.Module):
         self.hidden_size = self.d_model
         self.num_layers = CONFIG.num_layers
         self.dropout = CONFIG.dropout
+        # self.dropout_residual = 0.5
 
         self.seg_len = CONFIG.seg_length
         self.seg_num_x = self.seq_len // self.seg_len
         self.seg_num_y = self.pred_len // self.seg_len
-
+        self.use_residual = CONFIG.use_residual
 
         self.valueEmbedding = nn.Sequential(
             nn.Linear(self.seg_len, self.d_model),
@@ -40,15 +41,25 @@ class GRUModel(nn.Module):
             bidirectional=False,
             # dorpout=0.1
         )
+        self.gru_cell = nn.GRUCell(
+            input_size=self.d_model,
+            hidden_size=self.d_model,
+            # num_layers=self.num_layers,
+            bias=True,
+            # batch_first=True,
+        )
         self.pos_emb = nn.Parameter(torch.randn(self.seg_num_y, self.hidden_size // 2))
         self.channel_emb = nn.Parameter(torch.randn(self.enc_in, self.hidden_size // 2))
         # 定义输出层
         self.predict = nn.Sequential(
             nn.Dropout(self.dropout),
             nn.Linear(self.d_model, self.seg_len),
-            # nn.Dropout(self.dropout),
         )
-        # nn.Linear(hidden_size, output_size))
+
+        self.residual_projection = nn.Sequential(
+            nn.Dropout(self.dropout),
+            nn.Linear(self.d_model, self.d_model),
+        )
 
     def encoder(self, x):
         # b:batch_size c:channel_size s:seq_len s:seq_len
@@ -64,9 +75,26 @@ class GRUModel(nn.Module):
         x = self.valueEmbedding(x.reshape(-1, self.seg_num_x, self.seg_len))
         # print(x.shape)
         # encoding
-        _, hn = self.gru(x)  # bc,n,d  1,bc,d
+        hn = torch.zeros(1, x.shape[0], x.shape[2]).to(x.device)
+
+        if self.use_residual:
+            h_t = torch.zeros(x.shape[0], x.shape[2]).to(x.device)
+            for i in range(self.seg_num_x):
+                x_t = x[:, i, :]
+                h_t = self.gru_cell(x_t, h_t)
+                h_t = x_t + self.residual_projection(h_t)
+            hn = h_t.unsqueeze(0)
+        #     加入了残差和隐藏状态的dropout，想要测试一下这样会不会正则化强一点
+        else :
+            _, hn = self.gru(x)  # bc,n,d  1,bc,d
+
+
+
+
         # print("here comes hn.shape:")
+        # print(h_t.shape)
         # print(hn.shape)
+        # print(x.shape)
         # m,d//2 -> 1,m,d//2 -> c,m,d//2
         # c,d//2 -> c,1,d//2 -> c,m,d//2
         # c,m,d -> cm,1,d -> bcm, 1, d
@@ -93,14 +121,5 @@ class GRUModel(nn.Module):
     def forward(self, x):
         # 初始化隐藏状态
         return self.encoder(x)
-        # h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
-        #
-        # # GRU前向传播
-        # out, _ = self.gru(x, h0)  # out: [batch_size, seq_length, hidden_size]
-        #
-        # # 将GRU的输出传入全连接层
-        # out = self.predict(out)  # out: [batch_size, seq_length, output_size]
-        #
-        # return out
 
 # 设置设备

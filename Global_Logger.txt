@@ -535,3 +535,362 @@ data_mother_dir: ./dataSets/
 filepath: ./dataSets/ETTh2.csv
 Global_exp_logger_path: Global_Logger.txt
 
+2024-10-22 16:01:08 Test MSE: 0.359463, Test MAE: 0.394512
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 16:04:35 Test MSE: 0.445786, Test MAE: 0.458604
+input_length: 720
+output_length: 720
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 16:14:14 Test MSE: 0.421111, Test MAE: 0.445333
+input_length: 720
+output_length: 720
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: False
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh2
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh2.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 16:27:51 Test MSE: 0.357487, Test MAE: 0.395547
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: True
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 16:33:23 Test MSE: 0.361479, Test MAE: 0.397995
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: True
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 16:38:19 Test MSE: 0.359733, Test MAE: 0.395715
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: True
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 16:40:56 Test MSE: 0.357551, Test MAE: 0.393387
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: False
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 16:43:22 Test MSE: 0.432335, Test MAE: 0.450231
+input_length: 720
+output_length: 720
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: False
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 16:45:58 Test MSE: 0.436524, Test MAE: 0.454363
+input_length: 720
+output_length: 720
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: True
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 17:02:09 Test MSE: 0.416777, Test MAE: 0.432372
+input_length: 720
+output_length: 336
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: True
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 17:03:31 Test MSE: 0.365623, Test MAE: 0.393324
+input_length: 96
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: True
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 17:04:01 Test MSE: 0.367321, Test MAE: 0.393533
+input_length: 96
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: False
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 17:11:39 Test MSE: 0.419143, Test MAE: 0.420920
+input_length: 96
+output_length: 192
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: True
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 17:12:50 Test MSE: 0.441314, Test MAE: 0.435980
+input_length: 96
+output_length: 336
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: True
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 17:14:08 Test MSE: 0.445141, Test MAE: 0.452029
+input_length: 96
+output_length: 720
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: True
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 17:18:46 Test MSE: 0.366953, Test MAE: 0.393092
+input_length: 96
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: False
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 17:20:06 Test MSE: 0.417382, Test MAE: 0.420527
+input_length: 96
+output_length: 192
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: False
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 17:21:07 Test MSE: 0.441514, Test MAE: 0.435783
+input_length: 96
+output_length: 336
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: False
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
+2024-10-22 17:22:19 Test MSE: 0.445073, Test MAE: 0.452130
+input_length: 96
+output_length: 720
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+use_residual: False
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh1
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh1.csv
+Global_exp_logger_path: Global_Logger.txt
+
