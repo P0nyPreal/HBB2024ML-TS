@@ -1,4 +1,6 @@
-论文链接：https://arxiv.org/pdf/2308.11200
+SegRNN论文链接：https://arxiv.org/pdf/2308.11200
+Timemixer论文链接：https://arxiv.org/pdf/2405.14616
+
 
 好宝宝的实验记录嘿嘿嘿：
 https://www.yuque.com/huguangyao-mhwtn/kb/lwquotl2f1gg9tis

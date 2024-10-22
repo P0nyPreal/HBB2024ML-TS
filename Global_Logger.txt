@@ -517,3 +517,21 @@ learning_rate: 0.001
 filepath: ./dataSets/ETTh1.csv
 Global_exp_logger_path: Global_Logger.txt
 
+2024-10-22 15:16:43 Test MSE: 0.280530, Test MAE: 0.341458
+input_length: 720
+output_length: 96
+seg_length: 48
+train_ratio: 0.7
+dropout: 0.5
+dmodel: 512
+enc_in: 7
+num_layers: 1
+batch_size: 256
+num_epochs: 50
+learning_rate: 0.001
+model_name: SegRNN
+data_set: ETTh2
+data_mother_dir: ./dataSets/
+filepath: ./dataSets/ETTh2.csv
+Global_exp_logger_path: Global_Logger.txt
+
