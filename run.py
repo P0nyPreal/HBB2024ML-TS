@@ -31,10 +31,10 @@ batch_size = CONFIG.batch_size
 num_epochs = CONFIG.num_epochs  # 训练轮数
 lr = CONFIG.learning_rate
 
-train_dataset, train_loader = data_provider(embed='timeF', batch_size=batch_size, freq='h', root_path='./',
+train_dataset, train_loader = data_provider(data_set= CONFIG.data_set, embed='timeF', batch_size=batch_size, freq='h', root_path='./',
                                             data_path=CONFIG.filepath, seq_len=CONFIG.input_length, label_len=0,
                                             pred_len=CONFIG.output_length, features='M', target='OT', num_workers=0, flag='train')
-test_dataset, test_loader = data_provider(embed='timeF', batch_size=batch_size, freq='h', root_path='./',
+test_dataset, test_loader = data_provider(data_set= CONFIG.data_set, embed='timeF', batch_size=batch_size, freq='h', root_path='./',
                                           data_path=CONFIG.filepath, seq_len=CONFIG.input_length, label_len=0,
                                           pred_len=CONFIG.output_length, features='M', target='OT', num_workers=0, flag='test')
 
