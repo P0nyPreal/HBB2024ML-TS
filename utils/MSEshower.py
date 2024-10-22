@@ -12,10 +12,21 @@ def plot_two_arrays(MSEtrain, MSEtest):
     # Generate the index for the x-axis
     index = np.arange(len(MSEtrain))
 
+    # Find the minimum value of MSEtest and its index
+    min_mse_value = np.min(MSEtest)
+    min_mse_index = np.argmin(MSEtest)
+
     # Plot the data
     plt.figure(figsize=(10, 6))
     plt.plot(index, MSEtrain, label='MSE_train', marker='o')
     plt.plot(index, MSEtest, label='MSE_test', marker='s')
+
+    # Highlight the minimum value of MSEtest
+    plt.scatter(min_mse_index, min_mse_value, color='red', zorder=5)
+
+    # Display the minimum value in the right middle
+    plt.text(0.95, 0.5, f'Min MSE_test: {min_mse_value:.4f} (Index: {min_mse_index})',
+             ha='right', va='center', transform=plt.gca().transAxes, fontsize=20, color='red')
 
     # Add labels and title
     plt.xlabel('Index')

@@ -135,7 +135,7 @@ def data_provider(embed, batch_size, freq, root_path, data_path, seq_len, label_
         timeenc=timeenc,
         freq=freq
     )
-    print(flag, len(data_set))
+    # print(flag, len(data_set))
     data_loader = DataLoader(
         data_set,
         batch_size=batch_size,
