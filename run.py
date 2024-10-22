@@ -26,7 +26,6 @@ output_window = CONFIG.output_length
 seg_len = CONFIG.seg_length
 # seg_len = 24
 
-
 batch_size = CONFIG.batch_size
 num_epochs = CONFIG.num_epochs  # 训练轮数
 lr = CONFIG.learning_rate
