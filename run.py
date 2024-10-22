@@ -8,8 +8,8 @@ import torch.optim as optim
 # import torch.nn.functional as F
 # from dataLoader import load_data
 from dataSets.dataLoader import data_provider
-from models.testGRU import GRUModel
-from utils.MSEshower import plot_two_arrays, write_metrics_to_txt, write_string_to_file
+from models_HBB.testGRU import GRUModel
+from utils_HBB.MSEshower import plot_two_arrays, write_metrics_to_txt, write_string_to_file
 from torch.optim import lr_scheduler
 from configClass import config
 

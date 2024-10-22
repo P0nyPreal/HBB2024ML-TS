@@ -28,7 +28,6 @@ class config:
         self.Global_exp_logger_path = "Global_Logger.txt"
 
 
-
 if __name__ == '__main__':
     config = config()
     subprocess.run(['python', 'run.py'])
