@@ -4,7 +4,7 @@ import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler
 import os
-from utils.timefeatures import time_features
+from utils_HBB.timefeatures import time_features
 # from configClass import config
 
 # dataset of ETTh1
