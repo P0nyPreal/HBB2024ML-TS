@@ -1,12 +1,12 @@
 from torch.utils.data import DataLoader
-from dataSets.data_Loader import Dataset_ETT_hour
+from dataSets.data_Loader import Dataset_ETT_hour, Dataset_ETT_minute
 
 
 data_dict = {
     'ETTh1': Dataset_ETT_hour,
     'ETTh2': Dataset_ETT_hour,
-    # 'ETTm1': Dataset_ETT_minute,
-    # 'ETTm2': Dataset_ETT_minute,
+    'ETTm1': Dataset_ETT_minute,
+    'ETTm2': Dataset_ETT_minute,
     # 'custom': Dataset_Custom,
     # 'm4': Dataset_M4,
     # 'PSM': PSMSegLoader,

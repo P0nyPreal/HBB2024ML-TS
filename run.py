@@ -8,9 +8,16 @@ import torch.optim as optim
 # from dataLoader import load_data
 from dataSets.data_provider import data_provider
 from models_HBB.testGRU import GRUModel
+from models_HBB.timeMixer import TimeMixer
 from utils_HBB.MSEshower import plot_two_arrays, write_metrics_to_txt, write_string_to_file
 from torch.optim import lr_scheduler
 from configClass import config
+
+model_dict = {
+    'SegRNN': GRUModel,
+    'Timemixer': TimeMixer,
+}
+
 
 CONFIG = config()
 
@@ -41,7 +48,9 @@ test_dataset, test_loader = data_provider(data_set= CONFIG.data_set, embed='time
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # 实例化模型
-model = GRUModel(CONFIG).to(device)
+
+model = model_dict[CONFIG.model_name](CONFIG).to(device)
+# model = GRUModel(CONFIG).to(device)
 
 # 定义损失函数和优化器
 criterion = nn.MSELoss()

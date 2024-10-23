@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from utils.functions_TM import series_decomp, DataEmbedding_wo_pos, Normalize
+from utils_HBB.functions_TM import series_decomp, DataEmbedding_wo_pos, Normalize
 # from layers.Embed import DataEmbedding_wo_pos
 # from layers.StandardNorm import Normalize
 
@@ -118,11 +118,11 @@ class MultiScaleTrendMixing(nn.Module):
 class PastDecomposableMixing(nn.Module):
     def __init__(self, configs):
         super(PastDecomposableMixing, self).__init__()
-        self.seq_len = configs.seq_len
-        self.pred_len = configs.pred_len
+        self.seq_len = configs.input_length
+        self.pred_len = configs.output_length
         self.down_sampling_window = configs.down_sampling_window
 
-        self.layer_norm = nn.LayerNorm(configs.d_model)
+        self.layer_norm = nn.LayerNorm(configs.dmodel)
         self.dropout = nn.Dropout(configs.dropout)
         self.channel_independence = configs.channel_independence
 
@@ -135,9 +135,9 @@ class PastDecomposableMixing(nn.Module):
 
         if not configs.channel_independence:
             self.cross_layer = nn.Sequential(
-                nn.Linear(in_features=configs.d_model, out_features=configs.d_ff),
+                nn.Linear(in_features=configs.dmodel, out_features=configs.d_ff),
                 nn.GELU(),
-                nn.Linear(in_features=configs.d_ff, out_features=configs.d_model),
+                nn.Linear(in_features=configs.d_ff, out_features=configs.dmodel),
             )
 
         # Mixing season
@@ -147,9 +147,9 @@ class PastDecomposableMixing(nn.Module):
         self.mixing_multi_scale_trend = MultiScaleTrendMixing(configs)
 
         self.out_cross_layer = nn.Sequential(
-            nn.Linear(in_features=configs.d_model, out_features=configs.d_ff),
+            nn.Linear(in_features=configs.dmodel, out_features=configs.d_ff),
             nn.GELU(),
-            nn.Linear(in_features=configs.d_ff, out_features=configs.d_model),
+            nn.Linear(in_features=configs.d_ff, out_features=configs.dmodel),
         )
 
     def forward(self, x_list):
@@ -190,9 +190,8 @@ class TimeMixer(nn.Module):
         super(TimeMixer, self).__init__()
         self.configs = configs
         # self.task_name = configs.task_name
-        self.seq_len = configs.seq_len
-        self.label_len = configs.label_len
-        self.pred_len = configs.pred_len
+        self.seq_len = configs.input_length
+        self.pred_len = configs.output_length
         self.down_sampling_window = configs.down_sampling_window
         self.channel_independence = configs.channel_independence
         self.pdm_blocks = nn.ModuleList([PastDecomposableMixing(configs)
@@ -202,10 +201,10 @@ class TimeMixer(nn.Module):
         self.enc_in = configs.enc_in
 
         if self.channel_independence:
-            self.enc_embedding = DataEmbedding_wo_pos(1, configs.d_model, configs.embed, configs.freq,
+            self.enc_embedding = DataEmbedding_wo_pos(1, configs.dmodel, configs.embed, configs.freq,
                                                       configs.dropout)
         else:
-            self.enc_embedding = DataEmbedding_wo_pos(configs.enc_in, configs.d_model, configs.embed, configs.freq,
+            self.enc_embedding = DataEmbedding_wo_pos(configs.enc_in, configs.dmodel, configs.embed, configs.freq,
                                                       configs.dropout)
 
         self.layer = configs.e_layers
@@ -347,3 +346,7 @@ class TimeMixer(nn.Module):
 
         return dec_out_list
 
+    def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
+        if self.task_name == 'long_term_forecast' or self.task_name == 'short_term_forecast':
+            dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
+            return dec_out
