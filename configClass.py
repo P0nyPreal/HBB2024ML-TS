@@ -7,20 +7,20 @@ class config:
         self.seg_length = 48
         # 分割窗口的大小
         self.train_ratio = 0.7
-        self.dropout = 0.5
+        self.dropout = 0.2
         self.dmodel = 512
         self.enc_in = 7
         self.num_layers = 1
-        self.use_residual = True
-        # self.use_residual = False
+        # self.use_residual = True
+        self.use_residual = False
 
         self.batch_size = 256
-        self.num_epochs = 40
-        self.learning_rate = 0.001
+        self.num_epochs = 30
+        self.learning_rate = 0.0001
 
 
-        # self.model_name = "SegRNN"
-        self.model_name = "Timemixer"
+        self.model_name = "SegRNN"
+        # self.model_name = "Timemixer"
         self.data_set = "ETTh1"
         # 数据集应该为enumerate(ETTh1, ETTh2, ETTm1, ETTm2)
         self.data_mother_dir = "./dataSets/"
