@@ -83,6 +83,7 @@ for epoch in range(num_epochs):
         # 前向传播
         outputs = model(X_batch)
 
+
         # 计算损失
         loss = criterion(outputs, Y_batch)
         total_loss.append(loss.item())
