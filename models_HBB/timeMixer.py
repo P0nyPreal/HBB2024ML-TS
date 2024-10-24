@@ -33,7 +33,7 @@ class MultiScaleSeasonMixing(nn.Module):
 
     def __init__(self, configs):
         super(MultiScaleSeasonMixing, self).__init__()
-
+        # self.seq_len = configs.input_length
         self.down_sampling_layers = torch.nn.ModuleList(
             [
                 nn.Sequential(

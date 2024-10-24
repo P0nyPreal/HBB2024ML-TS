@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from utils_HBB.functions_TM import series_decomp
+from models_HBB.timeMixer import PastDecomposableMixing
 # import torch.optim as optim
 # import torch.nn.functional as F
 # from dataLoader import load_data
@@ -15,9 +16,17 @@ class GRUModel(nn.Module):
         self.pred_len = CONFIG.output_length
         self.enc_in = CONFIG.enc_in
         # enc_in为变量数，是输入x的shape[-1]
+
+        self.use_gruCell = CONFIG.use_gruCell
+        self.use_hirarchical = CONFIG.use_hirarchical
+
         self.d_model = CONFIG.dmodel
-
-
+        self.preprocess = series_decomp(CONFIG.moving_avg)
+        # 增加了趋势分解操作函数。
+        if self.use_hirarchical:
+            self.pdm_blocks = nn.ModuleList([PastDecomposableMixing(CONFIG)
+                                         for _ in range(CONFIG.e_layers)])
+        # 增加了历史历史分解模块
         self.hidden_size = self.d_model
         self.num_layers = CONFIG.num_layers
         self.dropout = CONFIG.dropout
@@ -40,7 +49,6 @@ class GRUModel(nn.Module):
             bias=True,
             batch_first=True,
             bidirectional=False,
-            # dorpout=0.1
         )
         self.gru_cell = nn.GRUCell(
             input_size=self.d_model,
@@ -60,7 +68,19 @@ class GRUModel(nn.Module):
         self.residual_projection = nn.Sequential(
             nn.Dropout(self.dropout),
             nn.Linear(self.d_model, self.d_model),
-        )
+        ) if CONFIG.use_residual else nn.Identity()
+
+    def pre_enc(self, x_list):
+        if self.channel_independence:
+            return (x_list, None)
+        else:
+            out1_list = []
+            out2_list = []
+            for x in x_list:
+                x_1, x_2 = self.preprocess(x)
+                out1_list.append(x_1)
+                out2_list.append(x_2)
+            return (out1_list, out2_list)
 
     def encoder(self, x):
         # b:batch_size c:channel_size s:seq_len s:seq_len
@@ -76,9 +96,8 @@ class GRUModel(nn.Module):
         x = self.valueEmbedding(x.reshape(-1, self.seg_num_x, self.seg_len))
         # print(x.shape)
         # encoding
-        hn = torch.zeros(1, x.shape[0], x.shape[2]).to(x.device)
 
-        if self.use_residual:
+        if self.use_gruCell and not self.use_hirarchical:
             h_t = torch.zeros(x.shape[0], x.shape[2]).to(x.device)
             for i in range(self.seg_num_x):
                 x_t = x[:, i, :]
@@ -86,9 +105,15 @@ class GRUModel(nn.Module):
                 h_t = x_t + self.residual_projection(h_t)
             hn = h_t.unsqueeze(0)
         #     加入了残差和隐藏状态的dropout，想要测试一下这样会不会正则化强一点
-        else :
+        elif not self.use_hirarchical:
             _, hn = self.gru(x)  # bc,n,d  1,bc,d
-
+        elif self.use_hirarchical:
+            h_t = torch.zeros(x.shape[0], x.shape[2]).to(x.device)
+            for i in range(self.seg_num_x):
+                x_t = x[:, i, :]
+                h_t = self.gru_cell(x_t, h_t)
+                h_t = x_t + self.residual_projection(h_t)
+            hn = h_t.unsqueeze(0)
 
 
 
