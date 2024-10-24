@@ -18,7 +18,6 @@ class config:
         self.num_epochs = 30
         self.learning_rate = 0.0001
 
-
         # self.model_name = "SegRNN"
         self.model_name = "Timemixer"
         self.data_set = "ETTh1"
