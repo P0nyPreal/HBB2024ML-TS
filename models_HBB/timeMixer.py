@@ -277,7 +277,7 @@ class TimeMixer(nn.Module):
 
         return x_enc, x_mark_enc
 
-    def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
+    def forecast(self, x_enc, x_mark_enc):
 
         x_enc, x_mark_enc = self.__multi_scale_process_inputs(x_enc, x_mark_enc)
 

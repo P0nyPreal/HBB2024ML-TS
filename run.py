@@ -81,7 +81,10 @@ for epoch in range(num_epochs):
         # print(X_batch.shape)
         optimizer.zero_grad()
         # 前向传播
-        outputs = model(X_batch)
+
+
+        # 对于Timemixer模型，这里好像是要先进行embeding操作？？？
+        outputs = model(X_batch) if CONFIG.model_name != 'Timemixer' else model(X_batch, None)
 
 
         # 计算损失
