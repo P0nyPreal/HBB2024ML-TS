@@ -32,7 +32,7 @@ class GRUModel(nn.Module):
         self.dropout = CONFIG.dropout
         # self.dropout_residual = 0.5
         self.use_decompose = CONFIG.use_decompose
-
+        self.series_decompose = series_decomp(CONFIG.moving_avg)
 
         self.seg_len = CONFIG.seg_length
         self.seg_num_x = self.seq_len // self.seg_len
@@ -102,9 +102,10 @@ class GRUModel(nn.Module):
         seq_last = x[:, -1:, :].detach()
 
         x = (x - seq_last).permute(0, 2, 1)  # b,c,s
-        print("xshape is on the way：")
-        print(x.shape)
-        x_s_preEmbed, x_t_preEmbed = series_decomp(x)
+        # print("xshape is on the way：")
+        # print(x.shape)
+        x_s_preEmbed, x_t_preEmbed = self.series_decompose(x)
+        # x_s_preEmbed, x_t_preEmbed = series_decomp(x)
 
         # segment and embedding    b,c,s -> bc,n,w -> bc,n,d
         x_s = self.valueEmbedding(x_s_preEmbed.reshape(-1, self.seg_num_x, self.seg_len))
@@ -124,7 +125,7 @@ class GRUModel(nn.Module):
                 x_t_seasonal = x_s[:, i, :]
                 x_t_trend = x_t[:, i, :]
                 h_t_seasonal = self.gru_cell(x_t_seasonal, h_t_seasonal)
-                h_t_trend = self.gru_cell2(x_t_trend, h_t_trend)
+                h_t_trend = self.gru_cell_second(x_t_trend, h_t_trend)
                 # h_t = x_t + self.residual_projection(h_t)
             h_t_final = h_t_seasonal + h_t_trend
             hn = h_t_final.unsqueeze(0)
