@@ -9,6 +9,7 @@ import torch.optim as optim
 from dataSets.data_provider import data_provider
 from models_HBB.testGRU import GRUModel
 from models_HBB.timeMixer import TimeMixer
+from models_HBB.Hierarchical_RNN import Hierarch_RNN
 from utils_HBB.MSEshower import plot_two_arrays, write_metrics_to_txt, write_string_to_file
 from torch.optim import lr_scheduler
 from configClass import config
@@ -16,6 +17,7 @@ from configClass import config
 model_dict = {
     'SegRNN': GRUModel,
     'Timemixer': TimeMixer,
+    'HierarchRNN': Hierarch_RNN,
 }
 
 
