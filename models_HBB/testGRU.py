@@ -31,6 +31,8 @@ class GRUModel(nn.Module):
         self.num_layers = CONFIG.num_layers
         self.dropout = CONFIG.dropout
         # self.dropout_residual = 0.5
+        self.use_decompose = CONFIG.use_decompose
+
 
         self.seg_len = CONFIG.seg_length
         self.seg_num_x = self.seq_len // self.seg_len
@@ -57,6 +59,15 @@ class GRUModel(nn.Module):
             bias=True,
             # batch_first=True,
         )
+        if CONFIG.use_decompose:
+            self.gru_cell_second = nn.GRUCell(
+                input_size=self.d_model,
+                hidden_size=self.d_model,
+                # num_layers=self.num_layers,
+                bias=True,
+            )
+        #     当需要趋势分解的时候，就进行两次GRU层
+
         self.pos_emb = nn.Parameter(torch.randn(self.seg_num_y, self.hidden_size // 2))
         self.channel_emb = nn.Parameter(torch.randn(self.enc_in, self.hidden_size // 2))
         # 定义输出层
@@ -91,13 +102,35 @@ class GRUModel(nn.Module):
         seq_last = x[:, -1:, :].detach()
 
         x = (x - seq_last).permute(0, 2, 1)  # b,c,s
+        print("xshape is on the way：")
+        print(x.shape)
+        x_s_preEmbed, x_t_preEmbed = series_decomp(x)
 
         # segment and embedding    b,c,s -> bc,n,w -> bc,n,d
+        x_s = self.valueEmbedding(x_s_preEmbed.reshape(-1, self.seg_num_x, self.seg_len))
+        x_t = self.valueEmbedding(x_t_preEmbed.reshape(-1, self.seg_num_x, self.seg_len))
+
         x = self.valueEmbedding(x.reshape(-1, self.seg_num_x, self.seg_len))
-        # print(x.shape)
+
         # encoding
 
-        if self.use_gruCell and not self.use_hirarchical:
+        if self.use_decompose:
+            # 使用了趋势分解，加入了一层趋势分解。
+            # x_s, x_t = series_decomp(x)
+            # series_decomp作用在X的最后一维度，应该在valueEmbedding之前使用
+            h_t_seasonal = torch.zeros(x_s.shape[0], x.shape[2]).to(x.device)
+            h_t_trend = torch.zeros(x_t.shape[0], x.shape[2]).to(x.device)
+            for i in range(self.seg_num_x):
+                x_t_seasonal = x_s[:, i, :]
+                x_t_trend = x_t[:, i, :]
+                h_t_seasonal = self.gru_cell(x_t_seasonal, h_t_seasonal)
+                h_t_trend = self.gru_cell2(x_t_trend, h_t_trend)
+                # h_t = x_t + self.residual_projection(h_t)
+            h_t_final = h_t_seasonal + h_t_trend
+            hn = h_t_final.unsqueeze(0)
+
+
+        elif self.use_gruCell and not self.use_hirarchical:
             h_t = torch.zeros(x.shape[0], x.shape[2]).to(x.device)
             for i in range(self.seg_num_x):
                 x_t = x[:, i, :]

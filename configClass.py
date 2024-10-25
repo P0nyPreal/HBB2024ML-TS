@@ -1,7 +1,7 @@
 import subprocess
 class config:
     def __init__(self):
-        self.input_length = 96
+        self.input_length = 720
         self.output_length = 96
         # 实验设置output_length应该为enumerate(96, 192, 336, 720)
         self.seg_length = 48
@@ -15,6 +15,7 @@ class config:
         # self.use_residual = True
         self.use_residual = False
         self.use_gruCell = True
+        self.use_decompose = True
         # gru_cell就是将GRU模型拆开一层一层运行的结果
         self.use_hirarchical = True
         if self.use_hirarchical:
