@@ -1,13 +1,13 @@
 import subprocess
 class config:
     def __init__(self):
-        self.input_length = 960
-        self.output_length = 96
+        self.input_length = 480
+        self.output_length = 192
         # 实验设置output_length应该为enumerate(96, 192, 336, 720)
         self.seg_length = 96
         # 分割窗口的大小
         # self.train_ratio = 0.7
-        self.dropout = 0.2
+        self.dropout = 0.5
         self.dmodel = 512
         self.enc_in = 7
         self.num_layers = 1
@@ -19,7 +19,7 @@ class config:
         # gru_cell就是将GRU模型拆开一层一层运行的结果
         self.use_hirarchical = True
         if self.use_hirarchical:
-            self.hierarch_layers = 3
+            self.hierarch_layers = 1
             self.hierarch_scale = 2
             self.decomp_method = "moving_avg"
             self.e_layers = 1

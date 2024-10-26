@@ -122,15 +122,17 @@ class Hierarch_RNN(nn.Module):
             RNN_output_list.append(out_put_this_layer.view(1, -1, self.d_modelSize_list[i]))
 
         # 最后的多尺度输出投影了属于是===============================
-        output = nn.Parameter(torch.zeros(seq_last.size())).to(x.device)
+        output = torch.zeros(seq_last.size(0), self.pred_len, seq_last.size(2)).to(x.device)
         for i in range(self.hierarch_layers):
             y = self.predict_Hierarchical[i](RNN_output_list[i])
             y = y.view(-1, self.enc_in, self.pred_len)
             y = y.permute(0, 2, 1)
-            output = (y + seq_last) + output
+            output += (y + seq_last)
+            if i == 1:
+                return y + seq_last
         #     为什么这个地方不能写成 output += (y + seq_last)？？？
 
-        return output/3
+        return output / self.hierarch_layers
 
     def forward(self, x):
         # 初始化隐藏状态
