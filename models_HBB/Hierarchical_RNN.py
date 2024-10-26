@@ -112,6 +112,7 @@ class Hierarch_RNN(nn.Module):
             _, hy = self.gru_cells[i](pos_emb_list[i], hn_list[i].repeat(1, 1, self.seg_num_y_list[i]).view(1, -1, self.d_modelSize_list[i]))
             RNN_output_list.append(hy)
 
+
         # 最后的多尺度输出投影了属于是===============================
         output = nn.Parameter(torch.zeros(x.size()))
         for i in range(self.hierarch_layers):
