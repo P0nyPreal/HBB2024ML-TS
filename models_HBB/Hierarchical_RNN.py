@@ -30,6 +30,8 @@ class Hierarch_RNN(nn.Module):
         #      dmodel = [512,256,128]
 
         self.seg_num_x = self.seq_len // self.seg_len
+        self.seg_num_x_list = [self.seq_len // self.seg_len_list[i] for i in range(self.hierarch_layers)]
+
         self.seg_num_y = self.pred_len // self.seg_len
         self.seg_num_y_list = [self.pred_len // self.seg_len_list[i] for i in range(self.hierarch_layers)]
 
@@ -74,67 +76,57 @@ class Hierarch_RNN(nn.Module):
         ])
 
     def encoder(self, x):
-        # b:batch_size c:channel_size s:seq_len s:seq_len
-        # d:d_model w:seg_len n:seg_num_x m:seg_num_y
         batch_size = x.size(0)
-        # print(x.shape)
-        # normalization and permute     b,s,c -> b,c,s
         seq_last = x[:, -1:, :].detach()
-
         x = (x - seq_last).permute(0, 2, 1)  # b,c,s
-        # print("xshape is on the way：")
-        # print(x.shape)
-        x_s_preEmbed, x_t_preEmbed = self.series_decompose(x)
-        # x_s_preEmbed, x_t_preEmbed = series_decomp(x)
 
-        # segment and embedding    b,c,s -> bc,n,w -> bc,n,d
-        x_s = self.valueEmbedding(x_s_preEmbed.reshape(-1, self.seg_num_x, self.seg_len))
-        x_t = self.valueEmbedding(x_t_preEmbed.reshape(-1, self.seg_num_x, self.seg_len))
+        # 多尺寸输入嵌入===========================================
+        x_seged_list = []
+        for i in range(self.hierarch_layers):
+            x_seged_instance = self.valueEmbedding_Hierarchical[i](x.reshape(-1, self.seg_num_x_list[i], self.seg_len_list[i]))
+        #                        [512,256,128]                                     [10, 20, 40]          [96, 48, 24]
+            x_seged_list.append(x_seged_instance)
 
-        x = self.valueEmbedding(x.reshape(-1, self.seg_num_x, self.seg_len))
+        # encoding这里就是多尺度encoding的过程======================
+        hn_list = []
+        for layer in range(self.hierarch_layers):
+            h_t = torch.zeros(x_seged_list[layer].shape[0], x_seged_list[layer].shape[2]).to(x.device)
+            for i in range(self.seg_num_x_list[layer]):
+                x_t = x_seged_list[layer][:, i, :]
+                h_t = self.gru_cells[layer](x_t, h_t)
+                h_t = x_t + h_t
+            hn_list.append(h_t.unsqueeze(0))
 
-        # encoding
+        # 多尺度的可学习通道和位置输出初始化向量生成===================
+        pos_emb_list = []
+        for i in range(self.hierarch_layers):
+            pos_emb = torch.cat([
+                self.pos_emb_List[i].unsqueeze(0).repeat(self.enc_in, 1, 1),
+                self.channel_emb_List[i].unsqueeze(1).repeat(1, self.seg_num_y_list[i], 1)
+            ], dim=-1).view(-1, 1, self.d_modelSize_list[i]).repeat(batch_size, 1, 1)
+            pos_emb_list.append(pos_emb)
 
+        # 多尺度RNN结构的输出了属于是===============================
+        RNN_output_list = []
+        for i in range(self.hierarch_layers):
+            _, hy = self.gru_cells[i](pos_emb_list[i], hn_list[i].repeat(1, 1, self.seg_num_y_list[i]).view(1, -1, self.d_modelSize_list[i]))
+            RNN_output_list.append(hy)
 
-        if self.use_gruCell and not self.use_hirarchical:
-            h_t = torch.zeros(x.shape[0], x.shape[2]).to(x.device)
-            for i in range(self.seg_num_x):
-                x_t = x[:, i, :]
-                h_t = self.gru_cell(x_t, h_t)
-                h_t = x_t + self.residual_projection(h_t)
-            hn = h_t.unsqueeze(0)
-        #     加入了残差和隐藏状态的dropout，想要测试一下这样会不会正则化强一点
-        elif not self.use_hirarchical:
-            _, hn = self.gru(x)  # bc,n,d  1,bc,d
-        elif self.use_hirarchical:
-            h_t = torch.zeros(x.shape[0], x.shape[2]).to(x.device)
-            for i in range(self.seg_num_x):
-                x_t = x[:, i, :]
-                h_t = self.gru_cell(x_t, h_t)
-                h_t = x_t + self.residual_projection(h_t)
-            hn = h_t.unsqueeze(0)
+        # 最后的多尺度输出投影了属于是===============================
+        output = nn.Parameter(torch.zeros(x.size()))
+        for i in range(self.hierarch_layers):
+            y = self.predict_Hierarchical[i](RNN_output_list[i])
+            y = y.view(-1, self.enc_in, self.pred_len)
+            y = y.permute(0, 2, 1)
+            output = y + seq_last + output
 
-        pos_emb = torch.cat([
-            self.pos_emb.unsqueeze(0).repeat(self.enc_in, 1, 1),
-            self.channel_emb.unsqueeze(1).repeat(1, self.seg_num_y, 1)
-        ], dim=-1).view(-1, 1, self.d_model).repeat(batch_size, 1, 1)
-
-        _, hy = self.gru(pos_emb, hn.repeat(1, 1, self.seg_num_y).view(1, -1, self.d_model))  # bcm,1,d  1,bcm,d
-
-        y = self.predict(hy)
-
-        y = y.view(-1, self.enc_in, self.pred_len)
-        # permute and denorm
-        y = y.permute(0, 2, 1)
-
-        y = y + seq_last
-        return y
+        return output
 
     def forward(self, x):
         # 初始化隐藏状态
         return self.encoder(x)
 
 # 设置设备
-if __name__ == '__main__':
-    CONIFG = config()
-    model = model_dict[CONFIG.model_name](CONFIG).to(device)
+# if __name__ == '__main__':
+#     CONIFG = config()
+#     model = model_dict[CONFIG.model_name](CONFIG).to(device)

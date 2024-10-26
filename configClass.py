@@ -1,7 +1,7 @@
 import subprocess
 class config:
     def __init__(self):
-        self.input_length = 720
+        self.input_length = 960
         self.output_length = 96
         # 实验设置output_length应该为enumerate(96, 192, 336, 720)
         self.seg_length = 96
