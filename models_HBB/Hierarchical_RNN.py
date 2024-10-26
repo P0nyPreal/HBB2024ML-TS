@@ -1,5 +1,7 @@
 import torch
 import torch.nn as nn
+
+
 # from .configClass import config
 
 # import torch.optim as optim
@@ -64,7 +66,6 @@ class Hierarch_RNN(nn.Module):
             for i in range(self.hierarch_layers)
         ])
 
-
         self.pos_emb_List = nn.ParameterList([
             nn.Parameter(torch.randn(self.seg_num_y_list[i], self.d_modelSize_list[i] // 2))
             for i in range(self.hierarch_layers)
@@ -83,8 +84,9 @@ class Hierarch_RNN(nn.Module):
         # 多尺寸输入嵌入===========================================
         x_seged_list = []
         for i in range(self.hierarch_layers):
-            x_seged_instance = self.valueEmbedding_Hierarchical[i](x.reshape(-1, self.seg_num_x_list[i], self.seg_len_list[i]))
-        #                        [512,256,128]                                     [10, 20, 40]          [96, 48, 24]
+            x_seged_instance = self.valueEmbedding_Hierarchical[i](
+                x.reshape(-1, self.seg_num_x_list[i], self.seg_len_list[i]))
+            #                        [512,256,128]                                     [10, 20, 40]          [96, 48, 24]
             x_seged_list.append(x_seged_instance)
 
         # encoding这里就是多尺度encoding的过程======================
@@ -109,19 +111,26 @@ class Hierarch_RNN(nn.Module):
         # 多尺度RNN结构的输出了属于是===============================
         RNN_output_list = []
         for i in range(self.hierarch_layers):
-            _, hy = self.gru_cells[i](pos_emb_list[i], hn_list[i].repeat(1, 1, self.seg_num_y_list[i]).view(1, -1, self.d_modelSize_list[i]))
-            RNN_output_list.append(hy)
-
+            layer_output_list = []
+            for step in range(self.seg_num_y_list[i]):
+                step_length = pos_emb_list[i].shape[0] // self.seg_num_y_list[i]
+                pos_emb_input = pos_emb_list[i][step * step_length: (step + 1) * step_length][:, 0, :]
+                hy = self.gru_cells[i](pos_emb_input, hn_list[i][0, :, :])
+                layer_output_list.append(hy)
+            out_put_this_layer = torch.stack(layer_output_list, dim=0)
+            # 在第0个维度上concat输出
+            RNN_output_list.append(out_put_this_layer.view(1, -1, self.d_modelSize_list[i]))
 
         # 最后的多尺度输出投影了属于是===============================
-        output = nn.Parameter(torch.zeros(x.size()))
+        output = nn.Parameter(torch.zeros(seq_last.size())).to(x.device)
         for i in range(self.hierarch_layers):
             y = self.predict_Hierarchical[i](RNN_output_list[i])
             y = y.view(-1, self.enc_in, self.pred_len)
             y = y.permute(0, 2, 1)
-            output = y + seq_last + output
+            output = (y + seq_last) + output
+        #     为什么这个地方不能写成 output += (y + seq_last)？？？
 
-        return output
+        return output/3
 
     def forward(self, x):
         # 初始化隐藏状态
