@@ -22,6 +22,7 @@ class Hierarch_RNN(nn.Module):
         self.hidden_size = self.d_model
         self.dropout = CONFIG.dropout
         self.use_mixing = CONFIG.use_mixing
+        self.mixing_route = CONFIG.mixing_route
 
         self.seg_len = CONFIG.seg_length
         self.hierarch_layers = CONFIG.hierarch_layers
@@ -145,17 +146,19 @@ class Hierarch_RNN(nn.Module):
                 for j in range(self.hierarch_scale ** (layer + 1)):
                     x_t = x_seged_list[layer][:, j, :]
                     hn_list_instance[layer] = self.gru_cells[layer](x_t, hn_list_instance[layer])
-
+            # 这里就是多尺度之间的mixing过程===========================
             if self.use_mixing and self.hierarch_layers > 1:
-                # for o_now in range(self.hierarch_layers - 1):
-                #     o = o_now + 1
-                #     hn_list_instance[o] += self.scale_mixing_coarse2fine[o_now](hn_list_instance[o_now])
-                #     # hn_list_instance[o_now] /= 2
-
-                for o_now in range(self.hierarch_layers - 2, -1, -1):
-                    o = o_now + 1
-                    hn_list_instance[o_now] += self.scale_mixing_fine2coarse[o_now](hn_list_instance[o])
-                    # hn_list_instance[o_now] /= 2
+                if self.mixing_route == "coarse2fine":
+                    for o_now in range(self.hierarch_layers - 1):
+                        o = o_now + 1
+                        hn_list_instance[o] += self.scale_mixing_coarse2fine[o_now](hn_list_instance[o_now])
+                        # hn_list_instance[o_now] /= 2
+                #         思考一下这个地方需不需要整一个norm操作
+                elif self.mixing_route == "fine2coarse":
+                    for o_now in range(self.hierarch_layers - 2, -1, -1):
+                        o = o_now + 1
+                        hn_list_instance[o_now] += self.scale_mixing_fine2coarse[o_now](hn_list_instance[o])
+                        # hn_list_instance[o_now] /= 2
 
         hn_list = hn_list_instance
 

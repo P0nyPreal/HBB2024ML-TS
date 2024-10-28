@@ -32,6 +32,8 @@ class config:
         #     dff是 bottel-neck的大小属于是
             self.down_sampling_layers = 2
             self.use_mixing = True
+            if self.use_mixing:
+                self.mixing_route = "fine2coarse"
 
         self.batch_size = 512
         self.num_epochs = 50
