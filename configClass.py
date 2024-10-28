@@ -2,13 +2,13 @@ import subprocess
 class config:
     def __init__(self):
         self.input_length = 480
-        self.output_length = 192
+        self.output_length = 96
         # 实验设置output_length应该为enumerate(96, 192, 336, 720)
         self.seg_length = 96
         # 分割窗口的大小
         # self.train_ratio = 0.7
         self.dropout = 0.5
-        self.dmodel = 512
+        self.dmodel = 256
         self.enc_in = 7
         self.num_layers = 1
 
@@ -19,7 +19,7 @@ class config:
         # gru_cell就是将GRU模型拆开一层一层运行的结果
         self.use_hirarchical = True
         if self.use_hirarchical:
-            self.hierarch_layers = 1
+            self.hierarch_layers = 3
             self.hierarch_scale = 2
             self.decomp_method = "moving_avg"
             self.e_layers = 1
@@ -31,10 +31,13 @@ class config:
             self.d_ff = 256
         #     dff是 bottel-neck的大小属于是
             self.down_sampling_layers = 2
+            self.use_mixing = True
+            if self.use_mixing:
+                self.mixing_route = "fine2coarse"
 
-        self.batch_size = 256
+        self.batch_size = 512
         self.num_epochs = 50
-        self.learning_rate = 0.001
+        self.learning_rate = 0.005
 
         # self.model_name = "SegRNN"
         self.model_name = "HierarchRNN"
