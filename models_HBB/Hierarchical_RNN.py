@@ -29,8 +29,8 @@ class Hierarch_RNN(nn.Module):
 
         self.seg_len_list = [self.seg_len // (self.hierarch_scale ** i) for i in range(self.hierarch_layers)]
         # seg_len_list = [96, 48, 24]
-        # self.d_modelSize_list = [self.d_model // (self.hierarch_scale ** i) for i in range(self.hierarch_layers)]
-        self.d_modelSize_list = [self.d_model for i in range(self.hierarch_layers)]
+        self.d_modelSize_list = [self.d_model // (self.hierarch_scale ** i) for i in range(self.hierarch_layers)]
+        # self.d_modelSize_list = [self.d_model for i in range(self.hierarch_layers)]
         #      dmodel = [512,256,128]
 
         self.seg_num_x = self.seq_len // self.seg_len
@@ -85,15 +85,27 @@ class Hierarch_RNN(nn.Module):
             for i in range(self.hierarch_layers)
         ])
 
-        #coarse to fine scale mixing多尺度的mixing层——尺度为从大到小了属于是
-        self.scale_mixing = nn.ModuleList([
-            nn.Sequential(
-                nn.Dropout(0.2),
-                # nn.Dropout(self.dropout),
-                nn.Linear(self.d_modelSize_list[i], self.d_modelSize_list[i + 1]),
-            )
-            for i in range(self.hierarch_layers - 1)
-        ])
+        if self.use_mixing:
+            # coarse to fine coarse to fine scale mixing多尺度的mixing层——尺度为从大到小了属于是
+            self.scale_mixing_coarse2fine = nn.ModuleList([
+                nn.Sequential(
+                    nn.Dropout(0.3),
+                    # nn.Dropout(self.dropout),
+                    nn.Linear(self.d_modelSize_list[i], self.d_modelSize_list[i + 1]),
+                    nn.ReLU(),
+                )
+                for i in range(self.hierarch_layers - 1)
+            ])
+
+            self.scale_mixing_fine2coarse = nn.ModuleList([
+                nn.Sequential(
+                    nn.Dropout(0.3),
+                    # nn.Dropout(self.dropout),
+                    nn.Linear(self.d_modelSize_list[i + 1], self.d_modelSize_list[i]),
+                    nn.ReLU(),
+                )
+                for i in range(self.hierarch_layers - 1)
+            ])
 
     def encoder(self, x):
         batch_size = x.size(0)
@@ -134,9 +146,16 @@ class Hierarch_RNN(nn.Module):
                     x_t = x_seged_list[layer][:, j, :]
                     hn_list_instance[layer] = self.gru_cells[layer](x_t, hn_list_instance[layer])
 
-            for o_now in range(self.hierarch_layers - 1):
-                o = o_now + 1
-                hn_list_instance[o] += self.scale_mixing[o_now](hn_list_instance[o - 1])
+            if self.use_mixing and self.hierarch_layers > 1:
+                # for o_now in range(self.hierarch_layers - 1):
+                #     o = o_now + 1
+                #     hn_list_instance[o] += self.scale_mixing_coarse2fine[o_now](hn_list_instance[o_now])
+                #     # hn_list_instance[o_now] /= 2
+
+                for o_now in range(self.hierarch_layers - 2, -1, -1):
+                    o = o_now + 1
+                    hn_list_instance[o_now] += self.scale_mixing_fine2coarse[o_now](hn_list_instance[o])
+                    # hn_list_instance[o_now] /= 2
 
         hn_list = hn_list_instance
 

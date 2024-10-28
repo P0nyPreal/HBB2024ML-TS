@@ -19,7 +19,7 @@ class config:
         # gru_cell就是将GRU模型拆开一层一层运行的结果
         self.use_hirarchical = True
         if self.use_hirarchical:
-            self.hierarch_layers = 4
+            self.hierarch_layers = 3
             self.hierarch_scale = 2
             self.decomp_method = "moving_avg"
             self.e_layers = 1
@@ -33,7 +33,7 @@ class config:
             self.down_sampling_layers = 2
             self.use_mixing = True
 
-        self.batch_size = 256
+        self.batch_size = 512
         self.num_epochs = 50
         self.learning_rate = 0.005
 
