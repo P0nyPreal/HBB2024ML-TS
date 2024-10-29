@@ -90,9 +90,13 @@ class Hierarch_RNN(nn.Module):
         self.predict_Hierarchical = nn.ModuleList([
             nn.Sequential(
                 nn.Dropout(self.dropout),
+                nn.Linear(self.d_modelSize_list[i], self.seg_len),
+            )
+            for i in range(self.hierarch_layers)
+        ]) if self.multi_scale_process_inputs else nn.ModuleList([
+            nn.Sequential(
+                nn.Dropout(self.dropout),
                 nn.Linear(self.d_modelSize_list[i], self.seg_len_list[i]),
-                # nn.Dropout(self.dropout),
-                # nn.Linear(self.seg_len_list[i] // 2, self.seg_len_list[i]),
             )
             for i in range(self.hierarch_layers)
         ])
@@ -112,6 +116,15 @@ class Hierarch_RNN(nn.Module):
             nn.Parameter(torch.randn(self.enc_in, self.d_modelSize_list[i] // 2))
             for i in range(self.hierarch_layers)
         ])
+
+        if self.down_sampling_method == 'conv':
+            padding = 1 if torch.__version__ >= '1.5.0' else 2
+            self.down_pool = nn.Conv1d(in_channels=self.enc_in, out_channels=self.enc_in,
+                                  kernel_size=3, padding=padding,
+                                  stride=self.down_sampling_window,
+                                  padding_mode='circular',
+                                  bias=False)
+
 
         if self.use_mixing:
             # coarse to fine coarse to fine scale mixing多尺度的mixing层——尺度为从大到小了属于是
@@ -141,12 +154,7 @@ class Hierarch_RNN(nn.Module):
         elif self.down_sampling_method == 'avg':
             down_pool = torch.nn.AvgPool1d(self.down_sampling_window)
         elif self.down_sampling_method == 'conv':
-            padding = 1 if torch.__version__ >= '1.5.0' else 2
-            down_pool = nn.Conv1d(in_channels=self.enc_in, out_channels=self.enc_in,
-                                  kernel_size=3, padding=padding,
-                                  stride=self.down_sampling_window,
-                                  padding_mode='circular',
-                                  bias=False)
+            down_pool = self.down_pool
         else:
             return x_enc
         # B,T,C -> B,C,T
@@ -180,7 +188,7 @@ class Hierarch_RNN(nn.Module):
                 #   [512,256,128]   [10, 20, 40]  [96, 48, 24] [480. 240. 120]
                 x_seged_list.append(x_seged_instance)
         else:
-            print("Now use multi scale processing input==========")
+            # print("Now use multi scale processing input==========")
             x_seged_list_preprocess = self.__multi_scale_process_inputs(x)
         # 这里的__multi_scale_process_inputs(x)就是用的Timemixer的多尺度化方式
             for i in range(self.hierarch_layers):
@@ -217,8 +225,7 @@ class Hierarch_RNN(nn.Module):
                         x_t = x_seged_list[layer][:, j, :]
                         hn_list_instance[layer] = self.gru_cells[layer](x_t, hn_list_instance[layer])
                 else:
-                    for j in range(self.hierarch_scale ** (layer + 1)):
-                        x_t = x_seged_list[layer][:, j, :]
+                        x_t = x_seged_list[layer][:, i, :]
                         hn_list_instance[layer] = self.gru_cells[layer](x_t, hn_list_instance[layer])
 
             # 这里就是多尺度之间的mixing过程===========================

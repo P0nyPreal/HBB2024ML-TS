@@ -2,7 +2,7 @@ import subprocess
 class config:
     def __init__(self):
         self.input_length = 480
-        self.output_length = 96
+        self.output_length = 192
         # 实验设置output_length应该为enumerate(96, 192, 336, 720)
         self.seg_length = 96
         # 分割窗口的大小
@@ -31,9 +31,9 @@ class config:
             self.d_ff = 256
         #     dff是 bottel-neck的大小属于是
             self.down_sampling_layers = 2
-            self.use_mixing = False
+            self.use_mixing = True
 
-            self.down_sampling_method = 'avg'
+            self.down_sampling_method = 'conv'
             self.multi_scale_process_inputs = True
 
             if self.use_mixing:
@@ -41,11 +41,11 @@ class config:
 
         self.batch_size = 512
         self.num_epochs = 50
-        self.learning_rate = 0.005
+        self.learning_rate = 0.02
 
         # self.model_name = "SegRNN"
         self.model_name = "HierarchRNN"
-        self.data_set = "ETTh1"
+        self.data_set = "ETTh2"
         # 数据集应该为enumerate(ETTh1, ETTh2, ETTm1, ETTm2)
         self.data_mother_dir = "./dataSets/"
         self.filepath = self.data_mother_dir + self.data_set + ".csv"
