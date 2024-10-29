@@ -190,7 +190,7 @@ class Hierarch_RNN(nn.Module):
             # 在第0个维度上concat输出
             RNN_output_list.append(out_put_this_layer.view(1, -1, self.d_modelSize_list[i]))
 
-        # 最后的多尺度输出投影了属于是===============================
+        # 最后的多尺度输出投影了属于是==============================
         output = torch.zeros(seq_last.size(0), self.pred_len, seq_last.size(2)).to(x.device)
         last_layer_list = []
         for i in range(self.hierarch_layers):
