@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-
+from utils_HBB.functions_TM import series_decomp
 
 # from .configClass import config
 
@@ -27,6 +27,9 @@ class Hierarch_RNN(nn.Module):
         self.seg_len = CONFIG.seg_length
         self.hierarch_layers = CONFIG.hierarch_layers
         self.hierarch_scale = CONFIG.hierarch_scale
+
+        self.use_decompose = CONFIG.use_decompose
+        self.series_decompose = series_decomp(CONFIG.moving_avg)
 
         self.seg_len_list = [self.seg_len // (self.hierarch_scale ** i) for i in range(self.hierarch_layers)]
         # seg_len_list = [96, 48, 24]
