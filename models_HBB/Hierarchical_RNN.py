@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from utils_HBB.functions_TM import series_decomp
 
+
 # from .configClass import config
 
 # import torch.optim as optim
@@ -22,11 +23,15 @@ class Hierarch_RNN(nn.Module):
         self.hidden_size = self.d_model
         self.dropout = CONFIG.dropout
         self.use_mixing = CONFIG.use_mixing
-        self.mixing_route = CONFIG.mixing_route
+        if self.use_mixing:
+            self.mixing_route = CONFIG.mixing_route
 
         self.seg_len = CONFIG.seg_length
         self.hierarch_layers = CONFIG.hierarch_layers
         self.hierarch_scale = CONFIG.hierarch_scale
+        self.down_sampling_method = CONFIG.down_sampling_method
+        self.down_sampling_window = CONFIG.hierarch_scale
+        self.multi_scale_process_inputs = CONFIG.multi_scale_process_inputs
 
         self.use_decompose = CONFIG.use_decompose
         self.series_decompose = series_decomp(CONFIG.moving_avg)
@@ -37,21 +42,40 @@ class Hierarch_RNN(nn.Module):
         # self.d_modelSize_list = [self.d_model for i in range(self.hierarch_layers)]
         #      dmodel = [512,256,128]
 
-        self.seg_num_x = self.seq_len // self.seg_len
-        self.seg_num_x_list = [self.seq_len // self.seg_len_list[i] for i in range(self.hierarch_layers)]
+        if not self.multi_scale_process_inputs:
+            self.seg_num_x = self.seq_len // self.seg_len
+            self.seg_num_x_list = [self.seq_len // self.seg_len_list[i] for i in range(self.hierarch_layers)]
 
-        self.seg_num_y = self.pred_len // self.seg_len
-        self.seg_num_y_list = [self.pred_len // self.seg_len_list[i] for i in range(self.hierarch_layers)]
+            self.seg_num_y = self.pred_len // self.seg_len
+            self.seg_num_y_list = [self.pred_len // self.seg_len_list[i] for i in range(self.hierarch_layers)]
+        else:
+            self.seg_num_x = self.seq_len // self.seg_len
+            self.seg_num_x_list = [self.seq_len // self.seg_len_list[0] for i in range(self.hierarch_layers)]
+
+            self.seg_num_y = self.pred_len // self.seg_len
+            self.seg_num_y_list = [self.pred_len // self.seg_len_list[0] for i in range(self.hierarch_layers)]
+
         # 定义embeding层，也具有多尺度，反正就是多尺度我超
-        self.valueEmbedding_Hierarchical = nn.ModuleList([
-            nn.Sequential(
-                # 考虑一下这个要不要加一个dropout，可以以后测试一下
-                nn.Linear(self.seg_len_list[i], self.d_modelSize_list[i]),
-                nn.ReLU()
-            )
-            # dmodel = [512,256,128]
-            for i in range(self.hierarch_layers)
-        ])
+        if not self.multi_scale_process_inputs:
+            self.valueEmbedding_Hierarchical = nn.ModuleList([
+                nn.Sequential(
+                    # 考虑一下这个要不要加一个dropout，可以以后测试一下
+                    nn.Linear(self.seg_len_list[i], self.d_modelSize_list[i]),
+                    nn.ReLU()
+                )
+                # dmodel = [512,256,128]
+                for i in range(self.hierarch_layers)
+            ])
+        else:
+            self.valueEmbedding_Hierarchical = nn.ModuleList([
+                nn.Sequential(
+                    # 考虑一下这个要不要加一个dropout，可以以后测试一下
+                    nn.Linear(self.seg_len_list[i], self.d_modelSize_list[i]),
+                    nn.ReLU()
+                )
+                # dmodel = [512,256,128], seg_len_list = [96, 48, 24]
+                for i in range(self.hierarch_layers)
+            ])
 
         # 定义多尺度的GRU层
         self.gru_cells = nn.ModuleList([
@@ -111,18 +135,59 @@ class Hierarch_RNN(nn.Module):
                 for i in range(self.hierarch_layers - 1)
             ])
 
+    def __multi_scale_process_inputs(self, x_enc):
+        if self.down_sampling_method == 'max':
+            down_pool = torch.nn.MaxPool1d(self.down_sampling_window, return_indices=False)
+        elif self.down_sampling_method == 'avg':
+            down_pool = torch.nn.AvgPool1d(self.down_sampling_window)
+        elif self.down_sampling_method == 'conv':
+            padding = 1 if torch.__version__ >= '1.5.0' else 2
+            down_pool = nn.Conv1d(in_channels=self.enc_in, out_channels=self.enc_in,
+                                  kernel_size=3, padding=padding,
+                                  stride=self.down_sampling_window,
+                                  padding_mode='circular',
+                                  bias=False)
+        else:
+            return x_enc
+        # B,T,C -> B,C,T
+        x_enc = x_enc.permute(0, 2, 1)
+
+        x_enc_ori = x_enc
+
+        x_enc_sampling_list = [x_enc.permute(0, 2, 1)]
+
+        for i in range(self.hierarch_layers - 1):
+            x_enc_sampling = down_pool(x_enc_ori)
+
+            x_enc_sampling_list.append(x_enc_sampling.permute(0, 2, 1))
+            x_enc_ori = x_enc_sampling
+
+        x_enc = x_enc_sampling_list
+        return x_enc
+
     def encoder(self, x):
         batch_size = x.size(0)
         seq_last = x[:, -1:, :].detach()
-        x = (x - seq_last).permute(0, 2, 1)  # b,c,s
+        x_seged_list = []
 
         # 多尺寸输入嵌入===========================================
-        x_seged_list = []
-        for i in range(self.hierarch_layers):
-            x_seged_instance = self.valueEmbedding_Hierarchical[i](
-                x.reshape(-1, self.seg_num_x_list[i], self.seg_len_list[i]))
-            #                        [512,256,128]                                     [10, 20, 40]          [96, 48, 24]
-            x_seged_list.append(x_seged_instance)
+        if not self.multi_scale_process_inputs:
+            x = (x - seq_last).permute(0, 2, 1)  # b,c,s
+            for i in range(self.hierarch_layers):
+                x_seged_instance = self.valueEmbedding_Hierarchical[i](
+                    x.reshape(-1, self.seg_num_x_list[i], self.seg_len_list[i]))
+                #   [512,256,128]   [10, 20, 40]  [96, 48, 24] [480. 240. 120]
+                x_seged_list.append(x_seged_instance)
+        else:
+            print("Now use multi scale processing input==========")
+            x_seged_list_preprocess = self.__multi_scale_process_inputs(x)
+        # 这里的__multi_scale_process_inputs(x)就是用的Timemixer的多尺度化方式
+            for i in range(self.hierarch_layers):
+                x_seged_instance = self.valueEmbedding_Hierarchical[i](
+                    x_seged_list_preprocess[i].reshape(-1, self.seg_num_x_list[i],
+                                                       self.seg_len_list[i]))
+                #   [512,256,128]   [10, 20, 40]  [96, 48, 24]
+                x_seged_list.append(x_seged_instance)
 
         # encoding这里就是多尺度encoding的过程======================
 
@@ -146,9 +211,15 @@ class Hierarch_RNN(nn.Module):
 
             for layer_now in range(self.hierarch_layers - 1):
                 layer = layer_now + 1
-                for j in range(self.hierarch_scale ** (layer + 1)):
-                    x_t = x_seged_list[layer][:, j, :]
-                    hn_list_instance[layer] = self.gru_cells[layer](x_t, hn_list_instance[layer])
+                if not self.multi_scale_process_inputs:
+                    for j in range(self.hierarch_scale ** (layer + 1)):
+                        x_t = x_seged_list[layer][:, j, :]
+                        hn_list_instance[layer] = self.gru_cells[layer](x_t, hn_list_instance[layer])
+                else:
+                    for j in range(self.hierarch_scale ** (layer + 1)):
+                        x_t = x_seged_list[layer][:, j, :]
+                        hn_list_instance[layer] = self.gru_cells[layer](x_t, hn_list_instance[layer])
+
             # 这里就是多尺度之间的mixing过程===========================
             if self.use_mixing and self.hierarch_layers > 1:
                 if self.mixing_route == "coarse2fine":
@@ -164,7 +235,6 @@ class Hierarch_RNN(nn.Module):
                         # hn_list_instance[o_now] /= 2
 
         hn_list = hn_list_instance
-
 
         # 多尺度的可学习通道和位置输出初始化向量生成===================
         pos_emb_list = []
