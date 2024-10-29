@@ -170,6 +170,7 @@ class Hierarch_RNN(nn.Module):
         seq_last = x[:, -1:, :].detach()
         x_seged_list = []
 
+
         # 多尺寸输入嵌入===========================================
         if not self.multi_scale_process_inputs:
             x = (x - seq_last).permute(0, 2, 1)  # b,c,s
