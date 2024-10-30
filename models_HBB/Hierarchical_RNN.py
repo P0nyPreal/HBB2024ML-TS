@@ -17,6 +17,7 @@ class Hierarch_RNN(nn.Module):
         self.seq_len = CONFIG.input_length
         self.pred_len = CONFIG.output_length
         self.enc_in = CONFIG.enc_in
+        self.batch_size = CONFIG.batch_size
         # enc_in为变量数，是输入x的shape[-1]
 
         self.d_model = CONFIG.dmodel
@@ -32,6 +33,7 @@ class Hierarch_RNN(nn.Module):
         self.down_sampling_method = CONFIG.down_sampling_method
         self.down_sampling_window = CONFIG.hierarch_scale
         self.multi_scale_process_inputs = CONFIG.multi_scale_process_inputs
+        self.use_rand_emb = CONFIG.use_rand_emb
 
         self.use_decompose = CONFIG.use_decompose
         self.series_decompose = series_decomp(CONFIG.moving_avg)
@@ -117,6 +119,11 @@ class Hierarch_RNN(nn.Module):
             for i in range(self.hierarch_layers)
         ])
 
+        self.rand_emb_List = nn.ParameterList([
+            nn.Parameter(torch.randn(self.enc_in, 1, self.d_modelSize_list[i]).repeat(self.batch_size, 1, 1))
+            for i in range(self.hierarch_layers)
+        ])
+
         if self.down_sampling_method == 'conv':
             padding = 1 if torch.__version__ >= '1.5.0' else 2
             self.down_pool = nn.Conv1d(in_channels=self.enc_in, out_channels=self.enc_in,
@@ -174,7 +181,7 @@ class Hierarch_RNN(nn.Module):
         return x_enc
 
     def encoder(self, x):
-        batch_size = x.size(0)
+        batch_size = x.shape[0]
         seq_last = x[:, -1:, :].detach()
         x_seged_list = []
 
@@ -197,6 +204,9 @@ class Hierarch_RNN(nn.Module):
                                                        self.seg_len_list[i]))
                 #   [512,256,128]   [10, 20, 40]  [96, 48, 24]
                 x_seged_list.append(x_seged_instance)
+        # else:
+
+
 
         # encoding这里就是多尺度encoding的过程======================
 
@@ -246,12 +256,15 @@ class Hierarch_RNN(nn.Module):
 
         # 多尺度的可学习通道和位置输出初始化向量生成===================
         pos_emb_list = []
-        for i in range(self.hierarch_layers):
-            pos_emb = torch.cat([
-                self.pos_emb_List[i].unsqueeze(0).repeat(self.enc_in, 1, 1),
-                self.channel_emb_List[i].unsqueeze(1).repeat(1, self.seg_num_y_list[i], 1)
-            ], dim=-1).view(-1, 1, self.d_modelSize_list[i]).repeat(batch_size, 1, 1)
-            pos_emb_list.append(pos_emb)
+        if not self.use_rand_emb:
+            for i in range(self.hierarch_layers):
+                pos_emb = torch.cat([
+                    self.pos_emb_List[i].unsqueeze(0).repeat(self.enc_in, 1, 1),
+                    self.channel_emb_List[i].unsqueeze(1).repeat(1, self.seg_num_y_list[i], 1)
+                ], dim=-1).view(-1, 1, self.d_modelSize_list[i]).repeat(self.batch_size, 1, 1)
+                pos_emb_list.append(pos_emb)
+        else:
+            pos_emb_list = [param[:self.enc_in * batch_size] for param in self.rand_emb_List]
 
         # 多尺度RNN结构的输出了属于是===============================
         RNN_output_list = []
@@ -264,7 +277,6 @@ class Hierarch_RNN(nn.Module):
 
                 pos_emb_input = pos_emb_list[i][step * step_length: (step + 1) * step_length][:, 0, :]
                 hn_input = hn_now[step * hn_stop_length: (step + 1) * hn_stop_length, :]
-
                 hy = self.gru_cells[i](pos_emb_input, hn_input)
                 layer_output_list.append(hy)
             out_put_this_layer = torch.stack(layer_output_list, dim=0)

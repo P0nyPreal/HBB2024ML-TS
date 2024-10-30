@@ -2,7 +2,7 @@ import subprocess
 class config:
     def __init__(self):
         self.input_length = 480
-        self.output_length = 192
+        self.output_length = 96
         # 实验设置output_length应该为enumerate(96, 192, 336, 720)
         self.seg_length = 96
         # 分割窗口的大小
@@ -21,7 +21,7 @@ class config:
         if self.use_hirarchical:
             self.hierarch_layers = 3
             self.hierarch_scale = 2
-            self.decomp_method = "moving_avg"
+            # self.decomp_method = "moving_avg"
             self.e_layers = 1
             self.seq_len = self.input_length
             # e_layer是每次进行PDM的层数
@@ -33,19 +33,20 @@ class config:
             self.down_sampling_layers = 2
             self.use_mixing = True
 
-            self.down_sampling_method = 'conv'
+            self.down_sampling_method = 'avg'
             self.multi_scale_process_inputs = True
+            self.use_rand_emb = True
 
             if self.use_mixing:
                 self.mixing_route = "fine2coarse"
 
         self.batch_size = 512
         self.num_epochs = 50
-        self.learning_rate = 0.02
+        self.learning_rate = 0.01
 
         # self.model_name = "SegRNN"
         self.model_name = "HierarchRNN"
-        self.data_set = "ETTh2"
+        self.data_set = "ETTh1"
         # 数据集应该为enumerate(ETTh1, ETTh2, ETTm1, ETTm2)
         self.data_mother_dir = "./dataSets/"
         self.filepath = self.data_mother_dir + self.data_set + ".csv"
