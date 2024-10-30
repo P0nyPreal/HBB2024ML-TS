@@ -1,0 +1,5 @@
+# 忽略 all_logger 文件夹中的所有内容
+all_logger/
+
+# 忽略 Global_Logger.txt 文件
+Global_Logger.txt
