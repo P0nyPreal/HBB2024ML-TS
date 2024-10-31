@@ -3,12 +3,15 @@ class config:
     def __init__(self):
         self.input_length = 480
         self.output_length = 96
+        self.seq_len = self.input_length
+        self.pred_len = self.output_length
         # 实验设置output_length应该为enumerate(96, 192, 336, 720)
         self.seg_length = 96
         # 分割窗口的大小
         # self.train_ratio = 0.7
         self.dropout = 0.5
         self.dmodel = 256
+
         self.enc_in = 7
         self.num_layers = 1
 
@@ -21,14 +24,17 @@ class config:
         if self.use_hirarchical:
             self.hierarch_layers = 3
             self.hierarch_scale = 2
+            self.down_sampling_layers = self.hierarch_layers
+            self.down_sampling_window = self.hierarch_scale
+
+            self.channel_independence = False
             # self.decomp_method = "moving_avg"
             self.e_layers = 1
             self.seq_len = self.input_length
             # e_layer是每次进行PDM的层数
             self.moving_avg = 5
-            self.down_sampling_window = 5
             self.channel_independence = True
-            self.d_ff = 256
+            self.d_ff = self.dmodel//2
         #     dff是 bottel-neck的大小属于是
             self.down_sampling_layers = 2
             self.use_mixing = True
@@ -36,6 +42,7 @@ class config:
             self.down_sampling_method = 'avg'
             self.multi_scale_process_inputs = True
             self.use_rand_emb = True
+            self.use_norm = True
 
             if self.use_mixing:
                 self.mixing_route = "fine2coarse"
@@ -45,7 +52,8 @@ class config:
         self.learning_rate = 0.01
 
         # self.model_name = "SegRNN"
-        self.model_name = "HierarchRNN"
+        # self.model_name = "HierarchRNN"
+        self.model_name = "DecomposeRNN"
         self.data_set = "ETTh1"
         # 数据集应该为enumerate(ETTh1, ETTh2, ETTm1, ETTm2)
         self.data_mother_dir = "./dataSets/"
