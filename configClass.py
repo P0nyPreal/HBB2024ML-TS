@@ -6,7 +6,7 @@ class config:
         self.seq_len = self.input_length
         self.pred_len = self.output_length
         # 实验设置output_length应该为enumerate(96, 192, 336, 720)
-        self.seg_length = 96
+        self.seg_length = 48
         # 分割窗口的大小
         # self.train_ratio = 0.7
         self.dropout = 0.5
@@ -22,7 +22,7 @@ class config:
         # gru_cell就是将GRU模型拆开一层一层运行的结果
         self.use_hirarchical = True
         if self.use_hirarchical:
-            self.hierarch_layers = 3
+            self.hierarch_layers = 1
             self.hierarch_scale = 2
             self.down_sampling_layers = self.hierarch_layers
             self.down_sampling_window = self.hierarch_scale
@@ -41,7 +41,7 @@ class config:
 
             self.down_sampling_method = 'avg'
             self.multi_scale_process_inputs = True
-            self.use_rand_emb = True
+            self.use_rand_emb = False
             self.use_norm = True
 
             if self.use_mixing:
