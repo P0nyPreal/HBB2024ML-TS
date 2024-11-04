@@ -175,6 +175,7 @@ class Decompose_RNN(nn.Module):
         self.pred_len = CONFIG.output_length
         self.enc_in = CONFIG.enc_in
         self.batch_size = CONFIG.batch_size
+        self.enc_out = CONFIG.enc_out
         # enc_in为变量数，是输入x的shape[-1]
 
         self.d_model = CONFIG.dmodel
@@ -218,7 +219,7 @@ class Decompose_RNN(nn.Module):
         )
 
         # 定义embeding层，也具有多尺度，反正就是多尺度我超
-        self.enc_embedding = DataEmbedding_wo_pos(self.enc_in, self.enc_in,)
+        self.enc_embedding = DataEmbedding_wo_pos(self.enc_in, self.enc_out)
 
         # 定义多尺度的GRU层
         self.gru_cells = nn.ModuleList([
@@ -244,6 +245,14 @@ class Decompose_RNN(nn.Module):
             for i in range(self.hierarch_layers)
         ])
 
+        self.predict_Channel = nn.ModuleList([
+            nn.Sequential(
+                nn.Dropout(self.dropout),
+                nn.Linear(self.enc_out, self.enc_in),
+            )
+            for _ in range(self.hierarch_layers)
+        ])
+
         self.predict_output = nn.Sequential(
             nn.Dropout(0.3),
             # nn.Dropout(self.dropout),
@@ -256,12 +265,12 @@ class Decompose_RNN(nn.Module):
         ])
 
         self.channel_emb_List = nn.ParameterList([
-            nn.Parameter(torch.randn(self.enc_in, self.seg_len_list[i] // 2))
+            nn.Parameter(torch.randn(self.enc_out, self.seg_len_list[i] // 2))
             for i in range(self.hierarch_layers)
         ])
 
         self.rand_emb_List = nn.ParameterList([
-            nn.Parameter(torch.randn(self.enc_in, 1, self.seg_len_list[i]).repeat(self.batch_size, 1, 1))
+            nn.Parameter(torch.randn(self.enc_out, 1, self.seg_len_list[i]).repeat(self.batch_size, 1, 1))
             for i in range(self.hierarch_layers)
         ])
 
@@ -318,10 +327,10 @@ class Decompose_RNN(nn.Module):
 
         # 多尺寸输入嵌入===========================================
         for i, x in zip(range(len(x_seged_list_preEmbed)), x_seged_list_preEmbed):
-            # enc_out = self.enc_embedding(x)  # [B,T,C]
-            # # 通道维度的特征嵌入真的需要吗？？
-            # x_seged_list.append(enc_out.reshape(batch_size * self.enc_in, self.seg_num_x, -1))
-            x_seged_list.append(x.reshape(batch_size * self.enc_in, self.seg_num_x, -1))
+            enc_out = self.enc_embedding(x)  # [B,T,C]
+            # 通道维度的特征嵌入真的需要吗？？
+            x_seged_list.append(enc_out.reshape(batch_size * self.enc_out, self.seg_num_x, -1))
+            # x_seged_list.append(x.reshape(batch_size * self.enc_in, self.seg_num_x, -1))
 
 
         # x_seged_list = [B,T,C]
@@ -359,12 +368,12 @@ class Decompose_RNN(nn.Module):
         if not self.use_rand_emb:
             for i in range(self.hierarch_layers):
                 pos_emb = torch.cat([
-                    self.pos_emb_List[i].unsqueeze(0).repeat(self.enc_in, 1, 1),
+                    self.pos_emb_List[i].unsqueeze(0).repeat(self.enc_out, 1, 1),
                     self.channel_emb_List[i].unsqueeze(1).repeat(1, self.seg_num_y_list[i], 1)
                 ], dim=-1).view(-1, 1, self.seg_len_list[i]).repeat(self.batch_size, 1, 1)
                 pos_emb_list.append(pos_emb)
         else:
-            pos_emb_list = [param[:self.enc_in * batch_size] for param in self.rand_emb_List]
+            pos_emb_list = [param[:self.enc_out * batch_size] for param in self.rand_emb_List]
 
         # 多尺度RNN结构的输出了属于是===============================
         RNN_output_list = []
@@ -388,9 +397,9 @@ class Decompose_RNN(nn.Module):
         last_layer_list = []
         for i in range(self.hierarch_layers):
             y = self.predict_Hierarchical[i](RNN_output_list[i])
-            y = y.view(-1, self.enc_in, self.pred_len)
+            y = y.view(-1, self.enc_out, self.pred_len)
             y = y.permute(0, 2, 1)
-            last_layer_list.append(y)
+            y = self.predict_Channel[i](y)
             output += (y + seq_last)
         # output_last_layer = self.predict_output(torch.cat(last_layer_list, dim=1).permute(0, 2, 1))
 

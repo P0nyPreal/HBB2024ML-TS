@@ -11,6 +11,7 @@ from models_HBB.testGRU import GRUModel
 from models_HBB.timeMixer import TimeMixer
 from models_HBB.Hierarchical_RNN import Hierarch_RNN
 from models_HBB.Decompose_RNN import Decompose_RNN
+from models_HBB.TestDecomposeRNN import TestDecompRNN
 from utils_HBB.MSEshower import plot_two_arrays, write_metrics_to_txt, write_string_to_file
 from torch.optim import lr_scheduler
 from configClass import config
@@ -20,6 +21,7 @@ model_dict = {
     'Timemixer': TimeMixer,
     'HierarchRNN': Hierarch_RNN,
     'DecomposeRNN': Decompose_RNN,
+    'TestDecompRNN': TestDecompRNN
 }
 
 
@@ -64,7 +66,7 @@ optimizer = optim.Adam(model.parameters(), lr=lr)
 # scheduler = StepLR(optimizer, step_size=3, gamma=0.8)
 scheduler = lr_scheduler.OneCycleLR(optimizer=optimizer,
                                     steps_per_epoch=len(train_loader),
-                                    pct_start=0.3,
+                                    pct_start=0.5,
                                     epochs=num_epochs,
                                     max_lr=lr)
 

@@ -14,6 +14,7 @@ class config:
 
         self.enc_in = 7
         self.num_layers = 1
+        self.enc_out = 32
 
         # self.use_residual = True
         self.use_residual = False
@@ -48,23 +49,24 @@ class config:
                 self.mixing_route = "fine2coarse"
 
         self.batch_size = 512
-        self.num_epochs = 150
+        self.num_epochs = 50
         self.learning_rate = 0.01
 
         # self.model_name = "SegRNN"
         # self.model_name = "HierarchRNN"
-        self.model_name = "DecomposeRNN"
+        # self.model_name = "DecomposeRNN"
+        self.model_name = "TestDecompRNN"
         self.data_set = "ETTh1"
         # 数据集应该为enumerate(ETTh1, ETTh2, ETTm1, ETTm2)
         self.data_mother_dir = "./dataSets/"
         self.filepath = self.data_mother_dir + self.data_set + ".csv"
         self.Global_exp_logger_path = "Global_Logger.txt"
-
+        self.decomp_method = "moving_avg"
         if self.model_name == "Timemixer":
             self.seq_len = self.input_length
             # self.
-            self.decomp_method = "moving_avg"
-            self.moving_avg = 5
+
+            self.moving_avg = 7
             # moving_avg是平均池化的窗口大小
             self.top_k = 5
             self.d_ff = 256

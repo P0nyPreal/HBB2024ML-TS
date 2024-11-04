@@ -9,10 +9,10 @@ from utils_HBB.Embed import DataEmbedding_wo_pos
 
 
 
-# 此文件就对SegRNN的复现，属于是好宝宝的测试
-class GRUModel(nn.Module):
+# 此文件是对之前多尺度和分解RNN效果不好的另一个复现，准备直接在testGRU上面改
+class TestDecompRNN(nn.Module):
     def __init__(self, CONFIG):
-        super(GRUModel, self).__init__()
+        super(TestDecompRNN, self).__init__()
         self.seq_len = CONFIG.input_length
         self.pred_len = CONFIG.output_length
         self.enc_in = CONFIG.enc_in
@@ -83,17 +83,6 @@ class GRUModel(nn.Module):
             nn.Linear(self.d_model, self.d_model),
         ) if CONFIG.use_residual else nn.Identity()
 
-    def pre_enc(self, x_list):
-        if self.channel_independence:
-            return (x_list, None)
-        else:
-            out1_list = []
-            out2_list = []
-            for x in x_list:
-                x_1, x_2 = self.preprocess(x)
-                out1_list.append(x_1)
-                out2_list.append(x_2)
-            return (out1_list, out2_list)
 
     def encoder(self, x):
         # b:batch_size c:channel_size s:seq_len s:seq_len
@@ -112,70 +101,39 @@ class GRUModel(nn.Module):
         x_s = self.valueEmbedding(x_s_preEmbed.reshape(-1, self.seg_num_x, self.seg_len))
         x_t = self.valueEmbedding(x_t_preEmbed.reshape(-1, self.seg_num_x, self.seg_len))
 
-        x = self.valueEmbedding(x.reshape(-1, self.seg_num_x, self.seg_len))
-
-        # encoding
 
         if self.use_decompose:
             # 使用了趋势分解，加入了一层趋势分解。
             # x_s, x_t = series_decomp(x)
             # series_decomp作用在X的最后一维度，应该在valueEmbedding之前使用
-            h_t_seasonal = torch.zeros(x_s.shape[0], x.shape[2]).to(x.device)
-            h_t_trend = torch.zeros(x_t.shape[0], x.shape[2]).to(x.device)
+            h_t_seasonal = torch.zeros(x_s.shape[0], self.d_model).to(x.device)
+            h_t_trend = torch.zeros(x_t.shape[0], self.d_model).to(x.device)
             for i in range(self.seg_num_x):
                 x_t_seasonal = x_s[:, i, :]
                 x_t_trend = x_t[:, i, :]
                 h_t_seasonal = self.gru_cell(x_t_seasonal, h_t_seasonal)
                 h_t_trend = self.gru_cell_second(x_t_trend, h_t_trend)
-                h_t = h_t_seasonal + h_t_trend
-                # h_t_seasonal, h_t_trend = self.series_decompose(h_t.permute(0, 2, 1))
-
-
-                # h_t = x_t + self.residual_projection(h_t)
+                # h_t = (h_t_seasonal + h_t_trend).unsqueeze(1)
+                # h_t_seasonal, h_t_trend = self.series_decompose(h_t)
+                # h_t_seasonal = h_t_seasonal[:, 0, :]
+                # h_t_trend = h_t_trend[:, 0, :]
             h_t_final = h_t_seasonal + h_t_trend
             hn = h_t_final.unsqueeze(0)
 
 
-        elif self.use_gruCell and not self.use_hirarchical:
-            h_t = torch.zeros(x.shape[0], x.shape[2]).to(x.device)
-            for i in range(self.seg_num_x):
-                x_t = x[:, i, :]
-                h_t = self.gru_cell(x_t, h_t)
-                h_t = x_t + self.residual_projection(h_t)
-            hn = h_t.unsqueeze(0)
-        #     加入了残差和隐藏状态的dropout，想要测试一下这样会不会正则化强一点
-        elif not self.use_hirarchical:
-            _, hn = self.gru(x)  # bc,n,d  1,bc,d
-        elif self.use_hirarchical:
-            h_t = torch.zeros(x.shape[0], x.shape[2]).to(x.device)
-            for i in range(self.seg_num_x):
-                x_t = x[:, i, :]
-                h_t = self.gru_cell(x_t, h_t)
-                h_t = x_t + self.residual_projection(h_t)
-            hn = h_t.unsqueeze(0)
-
-
-
-        # print("here comes hn.shape:")
-        # print(h_t.shape)
-        # print(hn.shape)
-        # print(x.shape)
-        # m,d//2 -> 1,m,d//2 -> c,m,d//2
-        # c,d//2 -> c,1,d//2 -> c,m,d//2
-        # c,m,d -> cm,1,d -> bcm, 1, d
         pos_emb = torch.cat([
             self.pos_emb.unsqueeze(0).repeat(self.enc_in, 1, 1),
             self.channel_emb.unsqueeze(1).repeat(1, self.seg_num_y, 1)
         ], dim=-1).view(-1, 1, self.d_model).repeat(batch_size, 1, 1)
         # print("here comes pos_emb.shape:")
         # print(pos_emb.shape)
+
+
         _, hy = self.gru(pos_emb, hn.repeat(1, 1, self.seg_num_y).view(1, -1, self.d_model))  # bcm,1,d  1,bcm,d
-        # print("here comes hy.shape:")
-        # print(hy.shape)
+
         # 1,bcm,d -> 1,bcm,w -> b,c,s
         y = self.predict(hy)
-        # print("here comes y.shape:")
-        # print(y.shape)
+
         y = y.view(-1, self.enc_in, self.pred_len)
         # permute and denorm
         y = y.permute(0, 2, 1)
