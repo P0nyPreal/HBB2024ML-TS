@@ -22,7 +22,7 @@ class config:
         # gru_cell就是将GRU模型拆开一层一层运行的结果
         self.use_hirarchical = True
         if self.use_hirarchical:
-            self.hierarch_layers = 1
+            self.hierarch_layers = 2
             self.hierarch_scale = 2
             self.down_sampling_layers = self.hierarch_layers
             self.down_sampling_window = self.hierarch_scale
@@ -48,7 +48,7 @@ class config:
                 self.mixing_route = "fine2coarse"
 
         self.batch_size = 512
-        self.num_epochs = 50
+        self.num_epochs = 150
         self.learning_rate = 0.01
 
         # self.model_name = "SegRNN"

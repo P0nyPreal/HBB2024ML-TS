@@ -218,7 +218,7 @@ class Decompose_RNN(nn.Module):
         )
 
         # 定义embeding层，也具有多尺度，反正就是多尺度我超
-        self.enc_embedding = DataEmbedding_wo_pos(self.enc_in, self.d_model)
+        self.enc_embedding = DataEmbedding_wo_pos(self.enc_in, self.enc_in,)
 
         # 定义多尺度的GRU层
         self.gru_cells = nn.ModuleList([
@@ -318,11 +318,10 @@ class Decompose_RNN(nn.Module):
 
         # 多尺寸输入嵌入===========================================
         for i, x in zip(range(len(x_seged_list_preEmbed)), x_seged_list_preEmbed):
-            # enc_out = self.enc_embedding(x)  # [B,T,C]
-
+            enc_out = self.enc_embedding(x)  # [B,T,C]
             # 通道维度的特征嵌入真的需要吗？？
 
-            x_seged_list.append(x.view(batch_size * self.enc_in, self.seg_num_x, -1))
+            x_seged_list.append(enc_out.reshape(batch_size * self.enc_in, self.seg_num_x, -1))
 
 
         # x_seged_list = [B,T,C]
@@ -375,7 +374,7 @@ class Decompose_RNN(nn.Module):
             for step in range(self.seg_num_y_list[i]):
                 step_length = pos_emb_list[i].shape[0] // self.seg_num_y_list[i]
                 hn_stop_length = hn_now.shape[0] // self.seg_num_y_list[i]
-
+                # print(hn_stop_length)
                 pos_emb_input = pos_emb_list[i][step * step_length: (step + 1) * step_length][:, 0, :]
                 hn_input = hn_now[step * hn_stop_length: (step + 1) * hn_stop_length, :]
                 hy = self.gru_cells[i](pos_emb_input, hn_input)

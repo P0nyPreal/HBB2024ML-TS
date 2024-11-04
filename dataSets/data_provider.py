@@ -23,7 +23,7 @@ def data_provider(data_set, embed, batch_size, freq, root_path, data_path, seq_l
 
     if flag == 'test':
         shuffle_flag = False
-        drop_last = False  # fix bug
+        drop_last = True  # fix bug
         batch_size = batch_size
         freq = freq
     elif flag == 'pred':
