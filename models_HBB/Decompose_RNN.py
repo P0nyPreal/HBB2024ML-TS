@@ -318,10 +318,10 @@ class Decompose_RNN(nn.Module):
 
         # 多尺寸输入嵌入===========================================
         for i, x in zip(range(len(x_seged_list_preEmbed)), x_seged_list_preEmbed):
-            enc_out = self.enc_embedding(x)  # [B,T,C]
-            # 通道维度的特征嵌入真的需要吗？？
-
-            x_seged_list.append(enc_out.reshape(batch_size * self.enc_in, self.seg_num_x, -1))
+            # enc_out = self.enc_embedding(x)  # [B,T,C]
+            # # 通道维度的特征嵌入真的需要吗？？
+            # x_seged_list.append(enc_out.reshape(batch_size * self.enc_in, self.seg_num_x, -1))
+            x_seged_list.append(x.reshape(batch_size * self.enc_in, self.seg_num_x, -1))
 
 
         # x_seged_list = [B,T,C]
