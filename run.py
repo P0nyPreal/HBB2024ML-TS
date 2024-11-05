@@ -28,16 +28,11 @@ model_dict = {
 CONFIG = config()
 
 filepath = CONFIG.filepath
-# Load the data
 input_window = CONFIG.input_length  # Number of time steps for the input (for long-term forecasting)
-# input_window = 96  # Number of time steps for the input (for long-term forecasting)
 
 output_window = CONFIG.output_length
-    # Number of time steps for the output (for long-term forecasting)
-# output_window = 24  # Number of time steps for the output (for long-term forecasting)
 
 seg_len = CONFIG.seg_length
-# seg_len = 24
 
 
 batch_size = CONFIG.batch_size
@@ -66,7 +61,7 @@ optimizer = optim.Adam(model.parameters(), lr=lr)
 # scheduler = StepLR(optimizer, step_size=3, gamma=0.8)
 scheduler = lr_scheduler.OneCycleLR(optimizer=optimizer,
                                     steps_per_epoch=len(train_loader),
-                                    pct_start=0.5,
+                                    pct_start=0.4,
                                     epochs=num_epochs,
                                     max_lr=lr)
 

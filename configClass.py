@@ -1,16 +1,17 @@
 import subprocess
 class config:
     def __init__(self):
-        self.input_length = 480
+        self.input_length = 960
+
         self.output_length = 96
         self.seq_len = self.input_length
         self.pred_len = self.output_length
         # 实验设置output_length应该为enumerate(96, 192, 336, 720)
-        self.seg_length = 48
+        self.seg_length = 96
         # 分割窗口的大小
         # self.train_ratio = 0.7
         self.dropout = 0.5
-        self.dmodel = 256
+        self.dmodel = 512
 
         self.enc_in = 7
         self.num_layers = 1
@@ -23,7 +24,7 @@ class config:
         # gru_cell就是将GRU模型拆开一层一层运行的结果
         self.use_hirarchical = True
         if self.use_hirarchical:
-            self.hierarch_layers = 2
+            self.hierarch_layers = 1
             self.hierarch_scale = 2
             self.down_sampling_layers = self.hierarch_layers
             self.down_sampling_window = self.hierarch_scale
@@ -50,7 +51,7 @@ class config:
 
         self.batch_size = 512
         self.num_epochs = 50
-        self.learning_rate = 0.01
+        self.learning_rate = 0.001
 
         # self.model_name = "SegRNN"
         # self.model_name = "HierarchRNN"
