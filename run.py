@@ -12,6 +12,7 @@ from models_HBB.timeMixer import TimeMixer
 from models_HBB.Hierarchical_RNN import Hierarch_RNN
 from models_HBB.Decompose_RNN import Decompose_RNN
 from models_HBB.TestDecomposeRNN import TestDecompRNN
+from models_HBB.fullDecomp_RNN import fullDecomp_RNN
 from utils_HBB.MSEshower import plot_two_arrays, write_metrics_to_txt, write_string_to_file
 from torch.optim import lr_scheduler
 from configClass import config
@@ -21,7 +22,8 @@ model_dict = {
     'Timemixer': TimeMixer,
     'HierarchRNN': Hierarch_RNN,
     'DecomposeRNN': Decompose_RNN,
-    'TestDecompRNN': TestDecompRNN
+    'TestDecompRNN': TestDecompRNN,
+    'fullDecomp_RNN': fullDecomp_RNN,
 }
 
 

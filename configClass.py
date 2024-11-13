@@ -56,7 +56,8 @@ class config:
         # self.model_name = "SegRNN"
         # self.model_name = "HierarchRNN"
         # self.model_name = "DecomposeRNN"
-        self.model_name = "TestDecompRNN"
+        # self.model_name = "TestDecompRNN"
+        self.model_name = "fullDecomp_RNN"
         self.data_set = "ETTh1"
         # 数据集应该为enumerate(ETTh1, ETTh2, ETTm1, ETTm2)
         self.data_mother_dir = "./dataSets/"
