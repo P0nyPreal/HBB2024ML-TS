@@ -1,13 +1,17 @@
 import torch
 import torch.nn as nn
-from utils_HBB.functions_TM import series_decomp
+from utils_HBB.functions_TM import series_decomp, TokenEmbedding
 from models_HBB.timeMixer import PastDecomposableMixing
+import math
 from utils_HBB.Embed import DataEmbedding_wo_pos
 
 
 # import torch.optim as optim
 # import torch.nn.functional as F
 # from dataLoader import load_data
+
+# 此文件是对testDecomposeRNN的改进版，输出部分也改进为分解后的输出
+
 
 class DFT_series_decomp(nn.Module):
     """
@@ -20,7 +24,7 @@ class DFT_series_decomp(nn.Module):
 
     def forward(self, x):
         xf = torch.fft.rfft(x)
-        freq = abs(xf)
+        freq = torch.abs(xf)
         freq[0] = 0
         top_k_freq, top_list = torch.topk(freq, 5)
         xf[freq <= top_k_freq.min()] = 0
@@ -29,7 +33,6 @@ class DFT_series_decomp(nn.Module):
         return x_season, x_trend
 
 
-# 此文件是对之前多尺度和分解RNN效果不好的另一个复现，准备直接在testGRU上面改
 class fullDecomp_RNN(nn.Module):
     def __init__(self, CONFIG):
         super(fullDecomp_RNN, self).__init__()
@@ -42,7 +45,8 @@ class fullDecomp_RNN(nn.Module):
         self.use_hirarchical = CONFIG.use_hirarchical
 
         self.d_model = CONFIG.dmodel
-        self.preprocess = series_decomp(CONFIG.moving_avg)
+        # self.preprocess = series_decomp(CONFIG.moving_avg)
+        # print(CONFIG.moving_avg)
         # self.preprocess = DFT_series_decomp(CONFIG.top_k)
         # 增加了趋势分解操作函数。
         if self.use_hirarchical:
@@ -54,7 +58,8 @@ class fullDecomp_RNN(nn.Module):
         self.dropout = CONFIG.dropout
         # self.dropout_residual = 0.5
         self.use_decompose = CONFIG.use_decompose
-        self.series_decompose = series_decomp(CONFIG.moving_avg)
+        # self.series_decompose = series_decomp(CONFIG.moving_avg)
+        self.series_decompose = DFT_series_decomp(CONFIG.top_k)
         # self.enc_embedding = DataEmbedding_wo_pos(self.enc_in, self.enc_in)
 
         self.seg_len = CONFIG.seg_length
@@ -62,7 +67,15 @@ class fullDecomp_RNN(nn.Module):
         self.seg_num_y = self.pred_len // self.seg_len
         self.use_residual = CONFIG.use_residual
 
+        self.value_embedding = TokenEmbedding(self.seg_len, d_model=CONFIG.dmodel)
+        # 来自Timemixer的embeding方式，反正效果很一般了属于是
+
         self.valueEmbedding = nn.Sequential(
+            nn.Linear(self.seg_len, self.d_model),
+            nn.ReLU()
+        )
+
+        self.valueEmbedding_second = nn.Sequential(
             nn.Linear(self.seg_len, self.d_model),
             nn.ReLU()
         )
@@ -137,7 +150,7 @@ class fullDecomp_RNN(nn.Module):
         # x_s_preEmbed, x_t_preEmbed = series_decomp(x)
         # segment and embedding    b,c,s -> bc,n,w -> bc,n,d
         x_s = self.valueEmbedding(x_s_preEmbed.reshape(-1, self.seg_num_x, self.seg_len))
-        x_t = self.valueEmbedding(x_t_preEmbed.reshape(-1, self.seg_num_x, self.seg_len))
+        x_t = self.valueEmbedding_second(x_t_preEmbed.reshape(-1, self.seg_num_x, self.seg_len))
 
         # 使用了趋势分解，加入了一层趋势分解。
         # x_s, x_t = series_decomp(x)

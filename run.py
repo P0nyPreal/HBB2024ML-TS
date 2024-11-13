@@ -63,7 +63,7 @@ optimizer = optim.Adam(model.parameters(), lr=lr)
 # scheduler = StepLR(optimizer, step_size=3, gamma=0.8)
 scheduler = lr_scheduler.OneCycleLR(optimizer=optimizer,
                                     steps_per_epoch=len(train_loader),
-                                    pct_start=0.5,
+                                    pct_start=0.3,
                                     epochs=num_epochs,
                                     max_lr=lr)
 
