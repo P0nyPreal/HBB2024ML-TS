@@ -34,7 +34,8 @@ class config:
             self.e_layers = 1
             self.seq_len = self.input_length
             # e_layer是每次进行PDM的层数
-            self.moving_avg = 5
+            self.moving_avg = 15
+            self.top_k = 5
             self.channel_independence = True
             self.d_ff = self.dmodel//2
         #     dff是 bottel-neck的大小属于是
@@ -50,8 +51,8 @@ class config:
                 self.mixing_route = "fine2coarse"
 
         self.batch_size = 512
-        self.num_epochs = 50
-        self.learning_rate = 0.001
+        self.num_epochs = 75
+        self.learning_rate = 0.003
 
         # self.model_name = "SegRNN"
         # self.model_name = "HierarchRNN"
@@ -68,7 +69,7 @@ class config:
             self.seq_len = self.input_length
             # self.
 
-            self.moving_avg = 7
+            self.moving_avg = 30
             # moving_avg是平均池化的窗口大小
             self.top_k = 5
             self.d_ff = 256

@@ -69,11 +69,24 @@ class TestDecompRNN(nn.Module):
                 # num_layers=self.num_layers,
                 bias=True,
             )
+            self.gru_second = nn.GRU(
+                input_size=self.d_model,
+                hidden_size=self.d_model,
+                num_layers=self.num_layers,
+                bias=True,
+                batch_first=True,
+                bidirectional=False,
+            )
         #     当需要趋势分解的时候，就进行两次GRU层
 
-        self.pos_emb = nn.Parameter(torch.randn(self.seg_num_y, self.hidden_size // 2))
-        self.channel_emb = nn.Parameter(torch.randn(self.enc_in, self.hidden_size // 2))
+        self.pos_emb_trend = nn.Parameter(torch.randn(self.seg_num_y, self.hidden_size // 2))
+        self.channel_emb_trend = nn.Parameter(torch.randn(self.enc_in, self.hidden_size // 2))
+
+        self.pos_emb_seasonal = nn.Parameter(torch.randn(self.seg_num_y, self.hidden_size // 2))
+        self.channel_emb_seasonal = nn.Parameter(torch.randn(self.enc_in, self.hidden_size // 2))
+
         # 定义输出层
+
         self.predict = nn.Sequential(
             nn.Dropout(self.dropout),
             nn.Linear(self.d_model, self.seg_len),
@@ -127,10 +140,17 @@ class TestDecompRNN(nn.Module):
         h_t_trend = h_t_trend.unsqueeze(0)
 
 
-        pos_emb = torch.cat([
-            self.pos_emb.unsqueeze(0).repeat(self.enc_in, 1, 1),
-            self.channel_emb.unsqueeze(1).repeat(1, self.seg_num_y, 1)
-        ], dim=-1).repeat(batch_size, 1, 1)
+        pos_emb_trend = torch.cat([
+            self.pos_emb_trend.unsqueeze(0).repeat(self.enc_in, 1, 1),
+            self.channel_emb_trend.unsqueeze(1).repeat(1, self.seg_num_y, 1)
+        ], dim=-1).view(-1, 1, self.d_model).repeat(batch_size, 1, 1)
+
+        pos_emb_seasonal  = torch.cat([
+            self.pos_emb_seasonal.unsqueeze(0).repeat(self.enc_in, 1, 1),
+            self.channel_emb_seasonal.unsqueeze(1).repeat(1, self.seg_num_y, 1)
+        ], dim=-1).view(-1, 1, self.d_model).repeat(batch_size, 1, 1)
+
+
         # print("here comes pos_emb.shape:")
         # print(pos_emb.shape)
 
@@ -146,9 +166,9 @@ class TestDecompRNN(nn.Module):
         output_seasonal_list = []
         for i in range(self.seg_num_y):
             hn_step_length = hn.size(1) // self.seg_num_y
-            out_put_current_seasonal = self.gru_cell(pos_emb[:, i, :],
+            out_put_current_seasonal = self.gru_cell(pos_emb_seasonal[:, i, :],
                                             h_t_seasonal[0, i * hn_step_length: (i + 1) * hn_step_length])
-            out_put_current_trend = self.gru_cell_second(pos_emb[:, i, :],
+            out_put_current_trend = self.gru_cell_second(pos_emb_trend[:, i, :],
                                             h_t_trend[0, i * hn_step_length: (i + 1) * hn_step_length])
             output_trend_list.append(out_put_current_trend.unsqueeze(0))
             output_seasonal_list.append(out_put_current_seasonal.unsqueeze(0))

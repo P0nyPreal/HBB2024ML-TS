@@ -26,8 +26,8 @@ model_dict = {
     'fullDecomp_RNN': fullDecomp_RNN,
 }
 
-
 CONFIG = config()
+print('现在开始运行我抄这个模型我敲：' + CONFIG.model_name)
 
 filepath = CONFIG.filepath
 input_window = CONFIG.input_length  # Number of time steps for the input (for long-term forecasting)
@@ -63,7 +63,7 @@ optimizer = optim.Adam(model.parameters(), lr=lr)
 # scheduler = StepLR(optimizer, step_size=3, gamma=0.8)
 scheduler = lr_scheduler.OneCycleLR(optimizer=optimizer,
                                     steps_per_epoch=len(train_loader),
-                                    pct_start=0.4,
+                                    pct_start=0.5,
                                     epochs=num_epochs,
                                     max_lr=lr)
 

@@ -9,6 +9,25 @@ from utils_HBB.Embed import DataEmbedding_wo_pos
 # import torch.nn.functional as F
 # from dataLoader import load_data
 
+class DFT_series_decomp(nn.Module):
+    """
+    Series decomposition block
+    """
+
+    def __init__(self, top_k=5):
+        super(DFT_series_decomp, self).__init__()
+        self.top_k = top_k
+
+    def forward(self, x):
+        xf = torch.fft.rfft(x)
+        freq = abs(xf)
+        freq[0] = 0
+        top_k_freq, top_list = torch.topk(freq, 5)
+        xf[freq <= top_k_freq.min()] = 0
+        x_season = torch.fft.irfft(xf)
+        x_trend = x - x_season
+        return x_season, x_trend
+
 
 # 此文件是对之前多尺度和分解RNN效果不好的另一个复现，准备直接在testGRU上面改
 class fullDecomp_RNN(nn.Module):
@@ -24,6 +43,7 @@ class fullDecomp_RNN(nn.Module):
 
         self.d_model = CONFIG.dmodel
         self.preprocess = series_decomp(CONFIG.moving_avg)
+        # self.preprocess = DFT_series_decomp(CONFIG.top_k)
         # 增加了趋势分解操作函数。
         if self.use_hirarchical:
             self.pdm_blocks = nn.ModuleList([PastDecomposableMixing(CONFIG)
@@ -69,11 +89,24 @@ class fullDecomp_RNN(nn.Module):
                 # num_layers=self.num_layers,
                 bias=True,
             )
+            self.gru_second = nn.GRU(
+                input_size=self.d_model,
+                hidden_size=self.d_model,
+                num_layers=self.num_layers,
+                bias=True,
+                batch_first=True,
+                bidirectional=False,
+            )
         #     当需要趋势分解的时候，就进行两次GRU层
 
-        self.pos_emb = nn.Parameter(torch.randn(self.seg_num_y, self.hidden_size // 2))
-        self.channel_emb = nn.Parameter(torch.randn(self.enc_in, self.hidden_size // 2))
+        self.pos_emb_trend = nn.Parameter(torch.randn(self.seg_num_y, self.hidden_size // 2))
+        self.channel_emb_trend = nn.Parameter(torch.randn(self.enc_in, self.hidden_size // 2))
+
+        self.pos_emb_seasonal = nn.Parameter(torch.randn(self.seg_num_y, self.hidden_size // 2))
+        self.channel_emb_seasonal = nn.Parameter(torch.randn(self.enc_in, self.hidden_size // 2))
+
         # 定义输出层
+
         self.predict = nn.Sequential(
             nn.Dropout(self.dropout),
             nn.Linear(self.d_model, self.seg_len),
@@ -126,38 +159,46 @@ class fullDecomp_RNN(nn.Module):
         h_t_seasonal = h_t_seasonal.unsqueeze(0)
         h_t_trend = h_t_trend.unsqueeze(0)
 
+        pos_emb_trend = torch.cat([
+            self.pos_emb_trend.unsqueeze(0).repeat(self.enc_in, 1, 1),
+            self.channel_emb_trend.unsqueeze(1).repeat(1, self.seg_num_y, 1)
+        ], dim=-1).view(-1, 1, self.d_model).repeat(batch_size, 1, 1)
 
-        pos_emb = torch.cat([
-            self.pos_emb.unsqueeze(0).repeat(self.enc_in, 1, 1),
-            self.channel_emb.unsqueeze(1).repeat(1, self.seg_num_y, 1)
-        ], dim=-1).repeat(batch_size, 1, 1)
+        pos_emb_seasonal = torch.cat([
+            self.pos_emb_seasonal.unsqueeze(0).repeat(self.enc_in, 1, 1),
+            self.channel_emb_seasonal.unsqueeze(1).repeat(1, self.seg_num_y, 1)
+        ], dim=-1).view(-1, 1, self.d_model).repeat(batch_size, 1, 1)
+
         # print("here comes pos_emb.shape:")
         # print(pos_emb.shape)
 
-        hn = hn.repeat(1, 1, self.seg_num_y).view(1, -1, self.d_model)
+        # hn = hn.repeat(1, 1, self.seg_num_y).view(1, -1, self.d_model)
 
         h_t_seasonal = h_t_seasonal.repeat(1, 1, self.seg_num_y).view(1, -1, self.d_model)
         h_t_trend = h_t_trend.repeat(1, 1, self.seg_num_y).view(1, -1, self.d_model)
 
         # _, hy = self.gru(pos_emb, hn)  # bcm,1,d  1,bcm,d
 
-        output_list = []
-        output_trend_list = []
-        output_seasonal_list = []
-        for i in range(self.seg_num_y):
-            hn_step_length = hn.size(1) // self.seg_num_y
-            out_put_current_seasonal = self.gru_cell(pos_emb[:, i, :],
-                                            h_t_seasonal[0, i * hn_step_length: (i + 1) * hn_step_length])
-            out_put_current_trend = self.gru_cell_second(pos_emb[:, i, :],
-                                            h_t_trend[0, i * hn_step_length: (i + 1) * hn_step_length])
-            output_trend_list.append(out_put_current_trend.unsqueeze(0))
-            output_seasonal_list.append(out_put_current_seasonal.unsqueeze(0))
-            output_list.append((out_put_current_seasonal + out_put_current_trend).unsqueeze(0))
+        # output_list = []
+        # output_trend_list = []
+        # output_seasonal_list = []
+        # for i in range(self.seg_num_y):
+        #     hn_step_length = hn.size(1) // self.seg_num_y
+        #     out_put_current_seasonal = self.gru_cell(pos_emb_seasonal[:, i, :],
+        #                                              h_t_seasonal[0, i * hn_step_length: (i + 1) * hn_step_length])
+        #     out_put_current_trend = self.gru_cell_second(pos_emb_trend[:, i, :],
+        #                                                  h_t_trend[0, i * hn_step_length: (i + 1) * hn_step_length])
+        #     output_trend_list.append(out_put_current_trend.unsqueeze(0))
+        #     output_seasonal_list.append(out_put_current_seasonal.unsqueeze(0))
+        #     output_list.append((out_put_current_seasonal + out_put_current_trend).unsqueeze(0))
+        #
+        # hy = torch.cat(output_list, dim=1)
+        # h_trend = torch.cat(output_trend_list, dim=1)
+        # h_seasonal = torch.cat(output_seasonal_list, dim=1)
 
+        _, h_trend = self.gru(pos_emb_trend, h_t_trend.repeat(1, 1, self.seg_num_y).view(1, -1, self.d_model))
+        _, h_seasonal = self.gru_second(pos_emb_seasonal, h_t_seasonal.repeat(1, 1, self.seg_num_y).view(1, -1, self.d_model))
 
-        hy = torch.cat(output_list, dim=1)
-        h_trend = torch.cat(output_trend_list, dim=1)
-        h_seasonal = torch.cat(output_seasonal_list, dim=1)
         y = self.predict_trend(h_trend) + self.predict_seasonal(h_seasonal)
 
         # 1,bcm,d -> 1,bcm,w -> b,c,s
