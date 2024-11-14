@@ -1,10 +1,11 @@
 import subprocess
 import torch
-print(torch.__version__)
+# print(torch.cuda.is_available())
+# print(torch.__version__)
 
 class config:
     def __init__(self):
-        self.input_length = 960
+        self.input_length = 768
 
         self.output_length = 96
         self.seq_len = self.input_length
@@ -38,7 +39,7 @@ class config:
             self.seq_len = self.input_length
             # e_layer是每次进行PDM的层数
             self.moving_avg = 7
-            self.top_k = 3
+            self.top_k = 4
             self.channel_independence = True
             self.d_ff = self.dmodel//2
         #     dff是 bottel-neck的大小属于是
@@ -54,7 +55,7 @@ class config:
                 self.mixing_route = "fine2coarse"
 
         self.batch_size = 512
-        self.num_epochs = 50
+        self.num_epochs = 60
         self.learning_rate = 0.003
 
         # self.model_name = "SegRNN"

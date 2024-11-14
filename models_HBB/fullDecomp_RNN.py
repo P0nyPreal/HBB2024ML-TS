@@ -24,7 +24,8 @@ class DFT_series_decomp(nn.Module):
 
     def forward(self, x):
         xf = torch.fft.rfft(x)
-        freq = torch.abs(xf)
+        # print(xf.dtype)
+        freq = torch.sqrt(xf.real ** 2 + xf.imag ** 2)
         freq[0] = 0
         top_k_freq, top_list = torch.topk(freq, 5)
         xf[freq <= top_k_freq.min()] = 0
